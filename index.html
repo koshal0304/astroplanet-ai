@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="How AstroPlanet's AI astrology guide, RUSE astrologer ranking and platform will be built and launched in 16 weeks.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2028%2028%22%3E%3Ccircle%20cx%3D%2214%22%20cy%3D%2214%22%20r%3D%2212.5%22%20fill%3D%22%23fff%22%20stroke%3D%22%231A1608%22%20stroke-width%3D%221.4%22/%3E%3Ccircle%20cx%3D%2214%22%20cy%3D%2214%22%20r%3D%225.5%22%20fill%3D%22%23FFC21A%22/%3E%3Ccircle%20cx%3D%2224.2%22%20cy%3D%229.6%22%20r%3D%222%22%20fill%3D%22%231A1608%22/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>AstroPlanet Implementation Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: editorial long-scroll. White paper, ink type, yellow as light: fills, glows, highlights and interactive states. Same identity as the BRD. */
+:root{
+  --paper:#FFFFFF; --wash:#FFFAEB; --ink:#1A1608; --ink-2:#4A4535; --muted:#7A735F; --line:#EFE8D2; --line-2:#E2D9BC;
+  --sun:#FFC21A; --sun-deep:#F2A900; --sun-soft:#FFF1C2; --sun-mid:#FFDD73; --ochre:#8C6200;
+  --good:#2F7D4F; --good-soft:#E3F2E8; --bad:#B8402C; --bad-soft:#FBE6E1;
+  --f-display:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --f-body:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --header-h:60px;
+  --gut-l:max(16px,env(safe-area-inset-left,0px)); --gut-r:max(16px,env(safe-area-inset-right,0px));
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:rgba(255,255,255,.92)}
+a{color:var(--ochre);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+em.hl,.hl{font-style:italic;background:linear-gradient(transparent 62%,var(--sun-mid) 62%);padding:0 .06em}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+
+/* Top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;height:var(--header-h);display:flex;align-items:center;gap:14px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.topbar .doc{color:var(--muted);font-size:14px;padding-left:14px;border-left:1px solid var(--line-2);white-space:nowrap}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;padding:4px 10px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;background:var(--paper)}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--sun)}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 14.5px/1 var(--f-body);color:var(--ink);text-decoration:none;padding:12px 18px;border-radius:999px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px -14px rgba(90,70,0,.6)}
+.btn.sun{background:var(--sun);border-color:var(--sun)}
+.btn.sun:hover{background:var(--sun-deep);border-color:var(--sun-deep)}
+.btn.sm{padding:8px 13px;font-size:13.5px}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--sun-deep);transform-origin:0 50%;transform:scaleX(0)}
+@media (max-width:760px){.topbar .doc,.topbar .pill{display:none}}
+
+/* Dot navigation */
+.dots{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:35;display:grid;gap:6px;list-style:none;margin:0;padding:0}
+.dots a{display:flex;align-items:center;justify-content:flex-end;gap:10px;text-decoration:none;color:var(--ink-2);font-size:12.5px;height:20px}
+.dots a span{opacity:0;transform:translateX(6px);transition:opacity .2s,transform .2s;background:var(--paper);padding:2px 8px;border-radius:6px;border:1px solid var(--line);white-space:nowrap}
+.dots a i{width:8px;height:8px;border-radius:50%;background:var(--line-2);transition:all .25s;flex:none}
+.dots a:hover span,.dots a:focus-visible span{opacity:1;transform:none}
+.dots a.active i{background:var(--sun-deep);box-shadow:0 0 0 4px var(--sun-soft);width:10px;height:10px}
+@media (max-width:1320px){.dots{display:none}}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);isolation:isolate}
+.hero::before{content:"";position:absolute;z-index:-1;right:-12%;top:-30%;width:72%;height:150%;background:radial-gradient(closest-side,var(--sun-soft),rgba(255,241,194,0) 72%)}
+.hero::after{content:"";position:absolute;z-index:-1;inset:0;background-image:radial-gradient(var(--line-2) 1px,transparent 1.2px);background-size:26px 26px;mask-image:linear-gradient(90deg,#000 0,transparent 55%);-webkit-mask-image:linear-gradient(90deg,#000 0,transparent 55%);opacity:.55}
+.hero-in{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:16px;align-items:center;padding-block:48px 40px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:clamp(46px,6.4vw,92px);line-height:.96;letter-spacing:-.02em;margin:16px 0 20px}
+.hero .lede{font-size:clamp(17px,1.5vw,19.5px);color:var(--ink-2);max-width:54ch;line-height:1.55}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.hero .meta{margin-top:22px;font-family:var(--f-mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);max-width:1280px;margin:0 auto;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.stat{padding:22px 18px 26px 0;display:grid;gap:4px;min-width:0}
+.stat + .stat{padding-left:18px;border-left:1px solid var(--line)}
+.stat b{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,3.4vw,44px);line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:14px;color:var(--ink-2)}
+@media (max-width:900px){
+  .hero-in{grid-template-columns:minmax(0,1fr);padding-block:24px 32px}
+  .cosmos{order:-1}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat:nth-child(3){padding-left:0;border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+}
+.cosmos{position:relative;height:clamp(320px,44vw,600px);cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.cosmos:active{cursor:grabbing}
+.cosmos canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cosmos .fallback-svg{position:absolute;inset:6%;width:88%;height:88%}
+.cosmos.ready .fallback-svg{display:none}
+.cosmos .hint{position:absolute;right:12px;bottom:10px;font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;background:rgba(255,255,255,.75);padding:3px 8px;border-radius:6px}
+.fallback-svg .r{fill:none;stroke:var(--ink);stroke-opacity:.5}
+.fallback-svg .b{fill:var(--sun-soft)}
+.fallback-svg .s{fill:var(--sun)}
+
+/* Sections */
+section.sec{padding-block:104px 8px;position:relative}
+.sec-head{display:grid;gap:14px;margin-bottom:40px;max-width:880px}
+.sec-head h2{font-family:var(--f-display);font-weight:400;font-size:clamp(36px,5vw,64px);line-height:1.02;letter-spacing:-.015em}
+.sec-head p{font-size:18px;color:var(--ink-2);max-width:66ch}
+.band{background:var(--wash);border-block:1px solid var(--line);margin-top:104px;padding-block:96px 96px}
+.band section.sec{padding-block:0}
+@media (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()){
+    .reveal{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 32%}
+    @keyframes rise{from{opacity:.3;transform:translateY(26px)}to{opacity:1;transform:none}}
+    .grow{animation:grow linear both;animation-timeline:view();animation-range:entry 10% entry 60%;transform-origin:0 50%}
+    @keyframes grow{from{transform:scaleX(.35)}to{transform:scaleX(1)}}
+  }
+}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:1000px){.g4,.g5{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.g2,.g3,.g4,.g5{grid-template-columns:minmax(0,1fr)}}
+.card{border:1px solid var(--line);border-radius:18px;padding:24px;background:var(--paper);display:grid;gap:10px;align-content:start;min-width:0;transition:border-color .25s,box-shadow .25s,transform .25s}
+.card p{color:var(--ink-2);font-size:15px}
+.card h3{font-size:18px;font-weight:700;letter-spacing:-.005em}
+.card.wash{background:var(--wash);border-color:transparent}
+.card.ink{background:var(--ink);color:#FFF8E2;border-color:var(--ink)}
+.card.ink p{color:#D9D0B4}
+.tilt{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out,box-shadow .25s}
+.tilt:hover{box-shadow:0 22px 40px -28px rgba(90,70,0,.45)}
+.icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--sun-soft);color:var(--ink)}
+.icon svg{width:22px;height:22px}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;padding:3px 8px;border-radius:6px;background:var(--wash);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
+.st{display:inline-block;font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px;white-space:nowrap;text-transform:uppercase}
+.st.inplace{border:1px solid var(--line-2);color:var(--muted);background:var(--paper)}
+.st.ext{background:var(--sun-soft);color:var(--ink)}
+.st.new{background:var(--sun);color:var(--ink)}
+
+/* Overview orbit */
+.overview{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
+.orbit-box{container-type:inline-size;width:min(480px,100%);aspect-ratio:1;position:relative;justify-self:center}
+.orbit-ring{position:absolute;inset:11%;border-radius:50%;border:1px dashed var(--line-2)}
+.orbit-ring.inner{inset:28%;border-style:solid;border-color:var(--line)}
+.orbit-core{position:absolute;inset:36%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE27A,var(--sun) 55%,var(--sun-deep));display:grid;place-items:center;text-align:center;box-shadow:0 0 0 10px var(--sun-soft),0 30px 60px -20px rgba(242,169,0,.55)}
+.orbit-core b{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,7cqw,34px);line-height:1}
+.orbit-core span{display:block;font-family:var(--f-mono);font-size:clamp(9px,2.3cqw,11px);letter-spacing:.12em;margin-top:4px}
+.orbit-spin{position:absolute;inset:0}
+.onode{position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate(var(--a)) translateX(39cqw) rotate(calc(-1 * var(--a)))}
+.onode > div{position:absolute;left:0;top:0;width:0;height:0}
+.onode .lab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);background:var(--paper);border:1px solid var(--line-2);border-radius:14px;padding:8px 12px;white-space:nowrap;font-size:clamp(11px,3cqw,13.5px);font-weight:600;display:flex;gap:7px;align-items:center;box-shadow:0 8px 20px -14px rgba(90,70,0,.5)}
+.onode .lab i{width:8px;height:8px;border-radius:50%;background:var(--sun-deep);flex:none}
+.onode.h .lab{background:var(--ink);color:#FFF8E2;border-color:var(--ink)}
+.onode.h .lab i{background:var(--sun)}
+@media (prefers-reduced-motion:no-preference){
+  .orbit-spin{animation:spin 90s linear infinite}
+  .onode > div{animation:spin 90s linear infinite reverse}
+  .orbit-box:hover .orbit-spin,.orbit-box:hover .onode > div{animation-play-state:paused}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.onode > div{transform-origin:0 0}
+@supports not (container-type:inline-size){.onode{transform:rotate(var(--a)) translateX(180px) rotate(calc(-1 * var(--a)))}}
+.ov-list{display:grid;gap:18px}
+.ov-item{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;align-items:start}
+.ov-item p{font-size:15.5px;color:var(--ink-2)}
+.ov-item b{display:block;font-size:17px;margin-bottom:2px}
+@media (max-width:900px){.overview{grid-template-columns:minmax(0,1fr)}}
+
+/* Architecture */
+.arch{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:32px;align-items:start}
+.arch-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:3px;background:var(--paper)}
+.seg button{font:600 13px/1 var(--f-body);border:0;background:transparent;color:var(--ink-2);padding:8px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#FFF8E2}
+.legend{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.stage{perspective:1600px;perspective-origin:50% 0}
+.stack{display:grid;gap:0;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.stage.is3d .stack{transform:rotateX(calc(14deg + var(--px,0deg))) rotateY(calc(-10deg + var(--py,0deg)))}
+.layer{position:relative;border:1px solid var(--line-2);border-radius:18px;background:rgba(255,255,255,.96);padding:14px 16px 16px;display:grid;gap:10px;transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .3s,border-color .3s}
+.stage.is3d .layer{transform:translateZ(calc((5 - var(--i)) * 16px));box-shadow:0 18px 30px -24px rgba(90,70,0,.45)}
+.stage.is3d .layer:hover{transform:translateZ(calc((5 - var(--i)) * 16px + 26px));border-color:var(--sun-deep)}
+.layer:nth-child(4n+1){background:rgba(255,250,235,.97)}
+.layer-label{display:flex;gap:10px;align-items:baseline;font-weight:700;font-size:14.5px}
+.layer-label .mono{font-size:11px;color:var(--ochre);font-weight:500}
+.layer-label small{font-weight:400;color:var(--muted);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 13.5px/1.2 var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--line-2);border-radius:10px;padding:8px 11px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s}
+.chip:hover{border-color:var(--ink);transform:translateY(-1px)}
+.chip[aria-pressed="true"]{background:var(--sun);border-color:var(--sun-deep);box-shadow:0 8px 18px -10px rgba(242,169,0,.8)}
+.sd{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;vertical-align:0}
+.sd.inplace{border:1.5px solid var(--muted)}
+.sd.ext{background:var(--sun-mid);border:1.5px solid var(--sun-deep)}
+.sd.new{background:var(--ink)}
+.conn{height:26px;display:flex;justify-content:space-around;padding-inline:18%;position:relative}
+.conn i{width:2px;height:100%;background:linear-gradient(var(--line-2),var(--line-2)) center/1px 100% no-repeat;position:relative;overflow:visible}
+.conn i::after{content:"";position:absolute;left:50%;top:0;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--sun-deep)}
+@media (prefers-reduced-motion:no-preference){
+  .conn i::after{animation:drop 1.8s cubic-bezier(.5,0,.5,1) infinite}
+  .conn i:nth-child(2)::after{animation-name:lift;animation-delay:.6s;background:var(--ink)}
+  .conn i:nth-child(3)::after{animation-delay:1.1s}
+}
+@keyframes drop{0%{transform:translateY(-4px);opacity:0}25%{opacity:1}100%{transform:translateY(24px);opacity:0}}
+@keyframes lift{0%{transform:translateY(24px);opacity:0}25%{opacity:1}100%{transform:translateY(-4px);opacity:0}}
+.panel{position:sticky;top:calc(var(--header-h) + 24px);border-radius:20px;background:var(--ink);color:#FFF8E2;padding:26px;display:grid;gap:14px;min-height:320px;overflow:hidden;isolation:isolate}
+.panel::before{content:"";position:absolute;z-index:-1;right:-80px;top:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,194,26,.35),transparent)}
+.panel .eyebrow{color:var(--sun)}
+.panel h3{font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1.05}
+.panel p{color:#E2D9BF;font-size:15.5px}
+.panel .tech{display:flex;flex-wrap:wrap;gap:6px}
+.panel .tech span{font-family:var(--f-mono);font-size:11.5px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.08);color:#FFF1C2;border:1px solid rgba(255,255,255,.12)}
+.panel .st{justify-self:start}
+.panel .st.inplace{background:transparent;color:#D9D0B4;border-color:rgba(255,255,255,.3)}
+.panel-swap{animation:swap .35s ease-out}
+@keyframes swap{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:980px){.arch{grid-template-columns:minmax(0,1fr)}.panel{position:relative;top:0;min-height:0}}
+
+/* Principles */
+.prin{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.prin .card{padding:22px 20px}
+.prin h3{font-size:17px}
+@media (max-width:1100px){.prin{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){.prin{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.prin{grid-template-columns:minmax(0,1fr)}}
+
+/* Journey */
+.journey{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:28px;align-items:start}
+.jsteps{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:j}
+.jsteps button{width:100%;text-align:left;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--paper);cursor:pointer;font:inherit;color:var(--ink);transition:border-color .25s,background .25s,transform .25s}
+.jsteps button:hover{border-color:var(--line-2);transform:translateX(2px)}
+.jsteps .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;border:1.5px solid var(--line-2);color:var(--muted);transition:all .3s}
+.jsteps b{display:block;font-size:15px}
+.jsteps small{display:block;color:var(--muted);font-size:12.5px;font-family:var(--f-mono)}
+.jsteps .ms{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.jsteps li.done .n{background:var(--ink);border-color:var(--ink);color:var(--sun)}
+.jsteps li.cur button{border-color:var(--sun-deep);background:var(--wash)}
+.jsteps li.cur .n{background:var(--sun);border-color:var(--sun-deep);color:var(--ink);box-shadow:0 0 0 5px var(--sun-soft)}
+.jdetail{margin-top:14px;border-radius:14px;background:var(--wash);padding:16px 18px;font-size:15px;color:var(--ink-2);min-height:92px}
+.jdetail b{color:var(--ink)}
+.lat{margin-top:16px;display:grid;gap:8px}
+.lat-bar{display:flex;height:30px;border-radius:9px;overflow:hidden;border:1px solid var(--line-2);background:var(--paper)}
+.lat-bar span{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:10.5px;color:var(--ink);overflow:hidden;white-space:nowrap;border-right:1px solid rgba(255,255,255,.7);opacity:.18;transition:opacity .35s}
+.lat-bar span.on{opacity:1}
+.lat-bar span:nth-child(odd){background:var(--sun-mid)}
+.lat-bar span:nth-child(even){background:var(--sun)}
+.lat-bar span:nth-child(5){background:var(--sun-deep)}
+.lat-bar span:last-child{background:var(--sun-soft);border-right:0}
+.lat-cap{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.phone{border-radius:30px;background:var(--ink);padding:10px;box-shadow:0 40px 80px -40px rgba(60,45,0,.55);max-width:440px;width:100%;justify-self:center}
+.screen{border-radius:22px;background:var(--paper);overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;min-height:560px}
+.screen-top{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.screen-top .av{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE27A,var(--sun) 60%,var(--sun-deep))}
+.screen-top b{font-size:14.5px;display:block;line-height:1.2}
+.screen-top small{font-size:11.5px;color:var(--muted)}
+.screen-top .tag{margin-left:auto}
+.msgs{padding:14px;display:grid;gap:10px;align-content:start;font-size:14px;line-height:1.5}
+.bubble{border-radius:16px;padding:10px 13px;max-width:88%}
+.bubble.me{justify-self:end;background:var(--ink);color:#FFF8E2;border-bottom-right-radius:5px}
+.bubble.ai{background:var(--wash);border:1px solid var(--line);border-bottom-left-radius:5px;color:var(--ink)}
+.bubble.ai p + p{margin-top:8px}
+.status{font-family:var(--f-mono);font-size:11.5px;color:var(--ochre);display:flex;gap:8px;align-items:center}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sun-deep)}
+.status.live::before{animation:blink 1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.cites{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cites span{font-family:var(--f-mono);font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--paper);border:1px solid var(--line-2);color:var(--ink-2)}
+.handoff{border:1px solid var(--sun-deep);border-radius:14px;padding:11px 12px;display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--paper)}
+.handoff .av2{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:19px;box-shadow:inset 0 0 0 2px var(--sun)}
+.handoff b{font-size:13.5px;display:block}
+.handoff small{font-size:11.5px;color:var(--muted)}
+.handoff .go{font:600 12px/1 var(--f-body);background:var(--sun);border:0;border-radius:999px;padding:8px 11px;color:var(--ink)}
+.compose{border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+.compose span{flex:1;border:1px solid var(--line);border-radius:999px;padding:9px 14px}
+.fade-in{animation:swap .4s ease-out}
+@media (max-width:980px){.journey{grid-template-columns:minmax(0,1fr)}}
+
+/* Models */
+.crit{display:grid;gap:12px}
+.crow{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr) 52px;gap:14px;align-items:center}
+.crow b{font-size:15px;font-weight:600}
+.crow small{display:block;color:var(--muted);font-size:12.5px;font-weight:400}
+.cbar{height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.cbar span{display:block;height:100%;background:var(--sun-deep);border-radius:99px}
+.crow .pct{font-family:var(--f-mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.crow{grid-template-columns:minmax(0,1fr) 44px}.crow .cbar{grid-column:1 / -1;grid-row:2}}
+.cands{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.cand ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--ink-2);display:grid;gap:5px}
+.cand .role{font-size:13.5px;border-top:1px dashed var(--line-2);padding-top:12px;color:var(--ink)}
+@media (max-width:900px){.cands{grid-template-columns:minmax(0,1fr)}}
+.tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;position:relative}
+.tier{border-radius:20px;padding:24px;display:grid;gap:10px;align-content:start;position:relative;min-width:0;border:1px solid var(--line)}
+.tier .model{font-family:var(--f-display);font-size:32px;line-height:1}
+.tier .job{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ochre)}
+.tier ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--ink-2);display:grid;gap:5px}
+.tier.t1{background:var(--wash)}
+.tier.t2{background:var(--sun);border-color:var(--sun)}
+.tier.t2 .job{color:var(--ink)}
+.tier.t3{background:var(--ink);color:#FFF8E2;border-color:var(--ink)}
+.tier.t3 ul{color:#D9D0B4}
+.tier.t3 .job{color:var(--sun)}
+.share{font-family:var(--f-mono);font-size:12px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.6);justify-self:start}
+.tier.t3 .share{background:rgba(255,255,255,.1)}
+@media (max-width:900px){.tiers{grid-template-columns:minmax(0,1fr)}}
+.field{display:grid;gap:8px}
+.field label{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;font-weight:600}
+.field output{font-family:var(--f-mono);font-weight:500;font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--sun-deep) var(--fill,50%),var(--line) var(--fill,50%));outline-offset:6px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--paper);border:2px solid var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--paper);border:2px solid var(--ink);cursor:pointer}
+
+/* Fine-tuning */
+.verdict{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:stretch}
+.verdict .card.ink h3{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,3.6vw,44px);line-height:1.05;color:#FFF8E2}
+.gate{display:grid;gap:10px;counter-reset:g}
+.gstep{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--paper);position:relative}
+.gstep::before{counter-increment:g;content:counter(g);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;background:var(--sun-soft)}
+.gstep b{display:block;font-size:15px}
+.gstep p{font-size:14px;color:var(--ink-2)}
+.gstep.yes{border-color:var(--sun-deep);background:var(--wash)}
+.gstep.yes::before{background:var(--sun)}
+@media (max-width:900px){.verdict{grid-template-columns:minmax(0,1fr)}}
+
+/* Pipeline */
+.pipe{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;position:relative}
+.pipe::before{content:"";position:absolute;left:4%;right:4%;top:27px;height:2px;background:repeating-linear-gradient(90deg,var(--line-2) 0 8px,transparent 8px 14px)}
+@media (prefers-reduced-motion:no-preference){.pipe::before{animation:flow 1.2s linear infinite}}
+@keyframes flow{to{background-position:14px 0}}
+.pstage{position:relative;display:grid;gap:10px;justify-items:center;text-align:center;padding:0 8px;min-width:0}
+.pstage .node{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--ink);font-family:var(--f-mono);font-size:13px;position:relative;z-index:1;transition:transform .25s,background .25s}
+.pstage:hover .node{transform:scale(1.08);background:var(--sun)}
+.pstage b{font-size:14.5px;line-height:1.25}
+.pstage p{font-size:13px;color:var(--ink-2)}
+.pstage.key .node{background:var(--sun);border-color:var(--sun-deep)}
+@media (max-width:1000px){
+  .pipe{grid-template-columns:minmax(0,1fr);gap:14px}
+  .pipe::before{left:27px;right:auto;top:10px;bottom:10px;width:2px;height:auto;background:repeating-linear-gradient(180deg,var(--line-2) 0 8px,transparent 8px 14px)}
+  .pstage{grid-template-columns:56px minmax(0,1fr);justify-items:start;text-align:left;gap:4px 16px;padding:0}
+  .pstage .node{grid-row:span 2}
+}
+.sources{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Evaluation */
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.metric{border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:8px;background:var(--paper);min-width:0}
+.metric .val{font-family:var(--f-display);font-size:46px;line-height:1;font-variant-numeric:tabular-nums}
+.metric .lbl{font-weight:600;font-size:15px}
+.metric p{font-size:13.5px;color:var(--ink-2)}
+.metric .meter{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.metric .meter span{display:block;height:100%;background:var(--sun-deep)}
+@media (max-width:900px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:540px){.metrics{grid-template-columns:minmax(0,1fr)}}
+.stackbar{display:flex;height:44px;border-radius:12px;overflow:hidden}
+.stackbar span{display:flex;align-items:center;padding-left:12px;font-family:var(--f-mono);font-size:12px;white-space:nowrap;overflow:hidden;color:var(--ink)}
+.stackbar .a{background:var(--sun-deep)}.stackbar .b{background:var(--sun)}.stackbar .c{background:var(--sun-mid)}.stackbar .d{background:var(--sun-soft)}
+.keys{display:flex;flex-wrap:wrap;gap:16px;font-size:13.5px;color:var(--ink-2);margin-top:10px}
+.keys i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.rt{display:grid;gap:9px}
+.rt div{display:grid;grid-template-columns:minmax(0,1fr) 120px 40px;gap:12px;align-items:center;font-size:14px}
+.rt .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.rt .bar span{display:block;height:100%;background:var(--ink)}
+.rt b{font-family:var(--f-mono);font-weight:500;font-size:13px;text-align:right}
+
+/* RUSE calculator */
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--paper)}
+.calc-in{padding:28px;display:grid;gap:18px;align-content:start}
+.calc-out{padding:28px;background:var(--wash);display:grid;gap:18px;align-content:start;border-left:1px solid var(--line)}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.presets button{font:500 13px/1 var(--f-body);border:1px dashed var(--line-2);background:var(--paper);border-radius:999px;padding:8px 12px;cursor:pointer;color:var(--ink-2)}
+.presets button:hover{border-style:solid;border-color:var(--ink);color:var(--ink)}
+.dial-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:center}
+.dial{width:150px;height:150px}
+.dial .bg{fill:none;stroke:var(--line-2);stroke-width:10}
+.dial .fg{fill:none;stroke:var(--sun-deep);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
+.dial text{font-family:var(--f-display);font-size:44px;fill:var(--ink)}
+.dial .u{font-family:var(--f-mono);font-size:10px;fill:var(--muted);letter-spacing:.1em}
+.tierbadge{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:17px;padding:8px 14px;border-radius:999px;background:var(--sun);width:max-content}
+.tierbadge.trusted{background:var(--sun-soft)}
+.tierbadge.dev{background:var(--paper);border:1px solid var(--line-2)}
+.tierbadge.review{background:var(--bad-soft)}
+.tierbadge.rising{background:var(--paper);border:1.5px dashed var(--sun-deep)}
+.contrib{display:flex;height:28px;border-radius:9px;overflow:hidden;border:1px solid var(--line-2)}
+.contrib span{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px;white-space:nowrap;overflow:hidden;transition:flex-grow .45s}
+.contrib .R{background:#FFE58A}.contrib .U{background:var(--sun-soft)}.contrib .S{background:#FFD24D}.contrib .E{background:var(--sun-deep)}.contrib .rest{background:var(--paper)}
+.qmini{width:100%;max-width:340px;height:auto}
+.qmini .q{stroke:var(--line-2)}
+.qmini .q1{fill:var(--sun)}.qmini .q2{fill:var(--sun-soft)}.qmini .q3{fill:var(--paper)}.qmini .q4{fill:var(--paper)}
+.qmini text{font-family:var(--f-body);font-size:11px;fill:var(--ink-2)}
+.qmini .ax{font-family:var(--f-mono);font-size:9.5px;fill:var(--muted);letter-spacing:.08em}
+.qmini .pt{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.qmini .pt circle{fill:var(--ink);stroke:var(--paper);stroke-width:3}
+.qmini .pt .halo{fill:var(--sun-deep);opacity:.35;stroke:none}
+.seg.dom button{padding:8px 12px}
+@media (max-width:900px){.calc{grid-template-columns:minmax(0,1fr)}.calc-out{border-left:0;border-top:1px solid var(--line)}}
+@media (max-width:420px){.dial-row{grid-template-columns:minmax(0,1fr)}.calc-in,.calc-out{padding:20px}}
+.ruseflow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ruseflow span{border:1px solid var(--line-2);border-radius:10px;padding:8px 12px;font-size:13.5px;background:var(--paper)}
+.ruseflow span.k{background:var(--sun);border-color:var(--sun)}
+.ruseflow i{font-style:normal;color:var(--muted)}
+
+/* System & stack */
+.tables{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
+table.t{width:100%;border-collapse:collapse;font-size:14px;min-width:680px}
+table.t th{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:12px 14px;background:var(--wash);border-bottom:1px solid var(--line)}
+table.t td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+table.t tr:last-child td{border-bottom:0}
+table.t td:first-child{color:var(--ink);font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+table.t code{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-2)}
+.modules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.modlist{display:flex;flex-wrap:wrap;gap:8px}
+.mod{font-family:var(--f-mono);font-size:12.5px;padding:7px 10px;border-radius:9px;border:1px solid var(--line-2);background:var(--paper)}
+.mod.new{background:var(--sun);border-color:var(--sun)}
+@media (max-width:800px){.modules{grid-template-columns:minmax(0,1fr)}}
+.stackgrid{display:grid;gap:12px}
+.srow{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px;align-items:start;padding:16px 0;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}
+.srow > b{font-size:15px;padding-top:6px}
+.srow .chips2{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line-2);border-radius:10px;padding:7px 10px;font-size:13.5px;background:var(--paper);transition:transform .2s,border-color .2s}
+.tchip:hover{transform:translateY(-1px);border-color:var(--ink)}
+@media (max-width:640px){.srow{grid-template-columns:minmax(0,1fr);gap:8px}}
+
+/* Deploy */
+.cicd{display:flex;flex-wrap:wrap;gap:0;align-items:stretch}
+.cstep{flex:1 1 120px;min-width:0;padding:16px 14px;border:1px solid var(--line);background:var(--paper);display:grid;gap:4px;align-content:start;position:relative;margin-right:-1px;margin-bottom:-1px}
+.cstep:first-child{border-radius:14px 0 0 14px}
+.cstep:last-child{border-radius:0 14px 14px 0}
+.cstep b{font-size:14.5px}
+.cstep small{font-size:12.5px;color:var(--ink-2)}
+.cstep .mono{font-size:10.5px;color:var(--ochre)}
+.cstep.gate{background:var(--sun);border-color:var(--sun-deep);z-index:1}
+.cstep.gate .mono{color:var(--ink)}
+@media (max-width:900px){.cicd{flex-direction:column}.cstep{margin-right:0;border-radius:0!important}.cstep:first-child{border-radius:14px 14px 0 0!important}.cstep:last-child{border-radius:0 0 14px 14px!important}}
+.canary{display:flex;gap:6px;align-items:flex-end;height:90px}
+.canary span{flex:1;border-radius:8px 8px 3px 3px;background:var(--sun-soft);display:flex;align-items:flex-end;justify-content:center;font-family:var(--f-mono);font-size:11px;padding-bottom:6px}
+.canary span:nth-child(2){background:var(--sun-mid)}
+.canary span:nth-child(3){background:var(--sun)}
+.canary span:nth-child(4){background:var(--sun-deep)}
+.loop{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.loop div{border-radius:12px;background:var(--wash);padding:12px;font-size:13.5px;color:var(--ink-2);display:grid;gap:3px}
+.loop b{color:var(--ink);font-size:14px}
+@media (max-width:760px){.loop{grid-template-columns:minmax(0,1fr)}}
+
+/* Gantt */
+.gantt-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--paper);-webkit-overflow-scrolling:touch}
+.gantt{display:grid;grid-template-columns:220px repeat(16,minmax(40px,1fr));min-width:880px;font-size:13px}
+.gantt > div{min-width:0}
+.gantt .gh{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.gantt .ph{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;padding:10px 8px;border-bottom:1px solid var(--line);border-left:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+.gantt .ph.p0{background:var(--sun-soft)}.gantt .ph.p1{background:var(--wash)}.gantt .ph.p2{background:var(--sun-soft)}.gantt .ph.p3{background:var(--wash)}.gantt .ph.p4{background:var(--sun-soft)}
+.gantt .lbl{padding:9px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13.5px;grid-column:1;background:var(--paper);position:sticky;left:0;z-index:2}
+.gantt .lane{grid-column:2 / -1;border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(16,minmax(40px,1fr));align-items:center;padding-block:7px;background-image:linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:calc(100% / 16) 100%}
+.gbar{height:22px;border-radius:7px;background:var(--sun);display:flex;align-items:center;padding-inline:8px;font-family:var(--f-mono);font-size:10.5px;white-space:nowrap;overflow:hidden;position:relative;cursor:default;transition:filter .2s,transform .2s}
+.gbar:hover{filter:brightness(.96);transform:translateY(-1px)}
+.gbar.alt{background:var(--sun-mid)}
+.gbar.soft{background:var(--sun-soft);border:1px solid var(--sun-mid)}
+.gbar.ink{background:var(--ink);color:#FFF1C2}
+.gms{grid-column:2 / -1;display:grid;grid-template-columns:repeat(16,minmax(40px,1fr));padding-block:10px 12px;align-items:center}
+.gms span{justify-self:end;display:flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:10.5px;font-weight:500;white-space:nowrap;transform:translateX(50%)}
+.gms span::before{content:"";width:10px;height:10px;background:var(--ink);transform:rotate(45deg)}
+.mstones{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.mstone{border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:8px;align-content:start;background:var(--paper);min-width:0}
+.mstone .wk{font-family:var(--f-mono);font-size:11.5px;color:var(--ochre)}
+.mstone b{font-size:16px}
+.mstone ul{margin:0;padding-left:16px;font-size:13.5px;color:var(--ink-2);display:grid;gap:4px}
+.mstone.final{background:var(--sun);border-color:var(--sun)}
+.mstone.final .wk{color:var(--ink)}
+@media (max-width:1100px){.mstones{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.mstones{grid-template-columns:minmax(0,1fr)}}
+
+/* Team */
+.team{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.role{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:2px;background:var(--paper)}
+.role b{font-size:14.5px}
+.role span{font-size:13px;color:var(--muted)}
+.role .n{font-family:var(--f-display);font-size:30px;line-height:1}
+.role.panel2{background:var(--wash);border-color:transparent}
+@media (max-width:900px){.team{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.team{grid-template-columns:minmax(0,1fr)}}
+
+/* Next steps */
+.next{border-radius:28px;background:var(--ink);color:#FFF8E2;padding:clamp(28px,5vw,56px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;position:relative;overflow:hidden;isolation:isolate}
+.next::before{content:"";position:absolute;z-index:-1;left:-120px;bottom:-160px;width:420px;height:420px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,194,26,.45),transparent)}
+.next h2{font-family:var(--f-display);font-weight:400;font-size:clamp(36px,4.6vw,58px);line-height:1.02}
+.next p{color:#D9D0B4;font-size:17px;margin-top:14px;max-width:44ch}
+.next ol{margin:0;padding:0;list-style:none;display:grid;gap:12px;counter-reset:n}
+.next li{counter-increment:n;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.next li::before{content:counter(n);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--sun);color:var(--ink);font-family:var(--f-mono);font-size:13px}
+.next li b{display:block;font-size:15.5px}
+.next li span{font-size:14px;color:#CFC6A9}
+.next .btn{margin-top:24px}
+@media (max-width:860px){.next{grid-template-columns:minmax(0,1fr)}}
+footer.end{max-width:1200px;margin:72px auto 0;padding:28px var(--gut-r) 40px var(--gut-l);border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;color:var(--muted);font-size:13.5px}
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top" aria-label="AstroPlanet, back to top">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5" fill="none" stroke="#1A1608" stroke-width="1.4"/><ellipse cx="14" cy="14" rx="12.5" ry="4.6" fill="none" stroke="#1A1608" stroke-width="1" transform="rotate(-24 14 14)" opacity=".5"/><circle cx="14" cy="14" r="5" fill="#FFC21A"/><circle cx="24.2" cy="9.6" r="1.8" fill="#1A1608"/></svg>
+      AstroPlanet
+    </a>
+    <span class="doc">Technical Implementation Blueprint</span>
+    <span class="spacer"></span>
+    <span class="pill"><span class="dot"></span>v1.0 · 21 Oct 2026</span>
+    <a class="btn sun sm" href="brd.html">Read the BRD</a>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<nav aria-label="Sections">
+  <ul class="dots" id="dots">
+    <li><a href="#top"><span>Overview</span><i></i></a></li>
+    <li><a href="#overview"><span>Solution</span><i></i></a></li>
+    <li><a href="#principles"><span>Principles</span><i></i></a></li>
+    <li><a href="#architecture"><span>Architecture</span><i></i></a></li>
+    <li><a href="#journey"><span>Request journey</span><i></i></a></li>
+    <li><a href="#models"><span>Model selection</span><i></i></a></li>
+    <li><a href="#finetune"><span>Fine-tuning</span><i></i></a></li>
+    <li><a href="#data"><span>Data preparation</span><i></i></a></li>
+    <li><a href="#eval"><span>Evaluation</span><i></i></a></li>
+    <li><a href="#ruse"><span>RUSE engine</span><i></i></a></li>
+    <li><a href="#system"><span>System design</span><i></i></a></li>
+    <li><a href="#stack"><span>Tech stack</span><i></i></a></li>
+    <li><a href="#deploy"><span>Deployment</span><i></i></a></li>
+    <li><a href="#roadmap"><span>Roadmap</span><i></i></a></li>
+    <li><a href="#team"><span>Team</span><i></i></a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="top" data-sec>
+  <div class="hero-in">
+    <div>
+      <p class="eyebrow">Technical Implementation Blueprint</p>
+      <h1>An AI guide that <em class="hl">calculates</em> before it speaks</h1>
+      <p class="lede">How we will build AstroPlanet's AI guide for core, medical and wellness astrology, rank astrologers with RUSE, and launch in 16 weeks on the Next.js, NestJS and Azure platform you already run.</p>
+      <div class="ctas">
+        <a class="btn sun" href="#architecture">Explore the architecture</a>
+        <a class="btn" href="#roadmap">See the roadmap</a>
+      </div>
+      <p class="meta">Prepared for AstroPlanet · Companion to BRD v1.0</p>
+    </div>
+    <div class="cosmos" id="cosmos" aria-label="Interactive 3D model of the zodiac with the Sun and the planets. Drag to rotate." role="img">
+      <svg class="fallback-svg" viewBox="0 0 400 400" aria-hidden="true">
+        <ellipse class="b" cx="200" cy="200" rx="190" ry="78"/>
+        <ellipse class="r" cx="200" cy="200" rx="190" ry="78"/>
+        <ellipse class="r" cx="200" cy="200" rx="150" ry="60" stroke-dasharray="3 6"/>
+        <ellipse class="r" cx="200" cy="200" rx="110" ry="160" transform="rotate(30 200 200)"/>
+        <circle class="s" cx="200" cy="200" r="46"/>
+      </svg>
+      <span class="hint">DRAG TO ROTATE</span>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>16 wks</b><span>kickoff to public launch</span></div>
+    <div class="stat"><b>3 → 1</b><span>domains, one conversational guide</span></div>
+    <div class="stat"><b>&lt; 2 s</b><span>to the first words of every answer</span></div>
+    <div class="stat"><b>≥ 99%</b><span>chart-fact accuracy, verified on every release</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- 01 OVERVIEW -->
+<section class="sec" id="overview" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">01 · Solution at a glance</p>
+    <h2>One guide, three domains and a network of <em class="hl">specialists</em></h2>
+  </div>
+  <div class="overview">
+    <div class="orbit-box reveal" aria-label="The AI guide at the centre, connected to the three domains, the chart engine, the knowledge base and specialist astrologers" role="img">
+      <div class="orbit-ring"></div>
+      <div class="orbit-ring inner"></div>
+      <div class="orbit-spin">
+        <div class="onode" style="--a:-90deg"><div><span class="lab"><i></i>Core astrology</span></div></div>
+        <div class="onode" style="--a:-30deg"><div><span class="lab"><i></i>Medical astrology</span></div></div>
+        <div class="onode" style="--a:30deg"><div><span class="lab"><i></i>Mental wellness</span></div></div>
+        <div class="onode h" style="--a:90deg"><div><span class="lab"><i></i>RUSE specialists</span></div></div>
+        <div class="onode" style="--a:150deg"><div><span class="lab"><i></i>Chart engine</span></div></div>
+        <div class="onode" style="--a:210deg"><div><span class="lab"><i></i>Knowledge base</span></div></div>
+      </div>
+      <div class="orbit-core"><div><b>Jyoti</b><span>AI GUIDE</span></div></div>
+    </div>
+    <div class="ov-list reveal">
+      <div class="ov-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(-25 12 12)"/></svg></div><div><b>A guide that knows the user's chart</b><p>Every answer starts from the user's computed birth chart, dasha and transits, then draws on an advisor-approved knowledge base. Users can ask in English, Hindi or Hinglish.</p></div></div>
+      <div class="ov-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg></div><div><b>Safety built into the architecture</b><p>Dedicated guards run before and after every answer. Medical questions get context, never a diagnosis. Crisis language switches the guide straight to real help.</p></div></div>
+      <div class="ov-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11a4 4 0 1 0-8 0"/><circle cx="12" cy="6" r="3"/><path d="M4 21v-1a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v1"/></svg></div><div><b>Specialists ranked by results</b><p>When a question needs human depth, the RUSE engine recommends astrologers by reliability, feedback, satisfaction and verified expertise in that exact domain.</p></div></div>
+      <div class="ov-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div><div><b>Built on what already works</b><p>The existing kundali, chat, wallet and payments modules stay. New capabilities arrive as NestJS modules in the same domain-driven layout.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 PRINCIPLES -->
+<section class="sec" id="principles" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">02 · Design principles</p>
+    <h2>Five rules every component follows</h2>
+  </div>
+  <div class="prin reveal">
+    <div class="card tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h2M13 11h2M9 15h2M13 15h2"/></svg></div><h3>Calculate, then interpret</h3><p>Charts come from the ephemeris engine. The model never computes a placement or a date.</p></div>
+    <div class="card tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h4"/></svg></div><h3>Ground every claim</h3><p>Interpretations come from approved, versioned and citable knowledge, not from the model's memory.</p></div>
+    <div class="card tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Safety runs first</h3><p>Guards check every message and every answer. A crisis signal overrides everything else.</p></div>
+    <div class="card tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11l5-5 5 5M12 6v14"/></svg></div><h3>Humans for depth</h3><p>The guide hands off to ranked specialists with a consented brief. Nobody starts from zero.</p></div>
+    <div class="card tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/></svg></div><h3>Measure every change</h3><p>No prompt, knowledge or model change ships without passing the evaluation gate.</p></div>
+  </div>
+</section>
+
+<!-- 03 ARCHITECTURE -->
+<section class="sec" id="architecture" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">03 · AI architecture</p>
+    <h2>Six layers, from the chat window to the <em class="hl">chart</em></h2>
+    <p>Select any component to see what it does, what it is built with, and whether it already exists in your platform.</p>
+  </div>
+  <div class="arch">
+    <div class="reveal">
+      <div class="arch-tools">
+        <div class="seg" role="group" aria-label="Diagram view">
+          <button type="button" id="v3d" aria-pressed="true">3D view</button>
+          <button type="button" id="vflat" aria-pressed="false">Flat view</button>
+        </div>
+        <div class="legend">
+          <span><span class="sd inplace"></span> In place</span>
+          <span><span class="sd ext"></span> Extended</span>
+          <span><span class="sd new"></span> New</span>
+        </div>
+      </div>
+      <div class="stage is3d" id="stage">
+        <div class="stack" id="stack"></div>
+      </div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+</section>
+
+</div>
+
+<!-- 04 JOURNEY (band) -->
+<div class="band">
+<div class="wrap">
+<section class="sec" id="journey" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">04 · A question, end to end</p>
+    <h2>What happens in the <em class="hl">1.8 seconds</em> after someone asks</h2>
+    <p>A real example from the medical and wellness domains. Press play to watch the request move through the system, or select any step.</p>
+  </div>
+  <div class="journey">
+    <div class="reveal">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn sun sm" type="button" id="jPlay">▶ Play the journey</button>
+        <span class="small muted">Example conversation · illustrative timings</span>
+      </div>
+      <ol class="jsteps" id="jSteps"></ol>
+      <div class="jdetail" id="jDetail"></div>
+      <div class="lat">
+        <div class="lat-bar" id="jLat"></div>
+        <div class="lat-cap"><span>0 ms</span><span id="jLatCap">First sentence on screen ≈ 1.75 s · target p95 ≤ 2 s</span><span>1,840 ms</span></div>
+      </div>
+    </div>
+    <div class="phone reveal" aria-label="Example AI guide conversation">
+      <div class="screen">
+        <div class="screen-top"><div class="av"></div><div><b>Jyoti</b><small>AI guide · Medical &amp; wellness</small></div><span class="tag">Example</span></div>
+        <div class="msgs" id="jMsgs">
+          <div class="bubble me">My Saturn Mahadasha started this year and I've felt exhausted and low for weeks. Is my chart saying something about my health?</div>
+          <div class="status" id="jStatus">Answered in 1.75 s · 3 sources</div>
+          <div class="bubble ai" id="jAnswer"></div>
+          <div id="jHandoff"></div>
+        </div>
+        <div class="compose"><span>Ask Jyoti anything…</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<div class="wrap">
+
+<!-- 05 MODELS -->
+<section class="sec" id="models" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">05 · Model selection</p>
+    <h2>The right model for each <em class="hl">job</em>, chosen on evidence</h2>
+    <p>We select models through a two-week bake-off on AstroPlanet's own questions, scored against weighted criteria. Our provisional recommendation is a three-tier Claude setup on Microsoft Foundry, which runs inside your existing Azure subscription.</p>
+  </div>
+
+  <div class="grid g2 reveal" style="gap:40px;align-items:start">
+    <div>
+      <h3 style="font-size:18px;margin-bottom:16px">Selection criteria and weights</h3>
+      <div class="crit">
+        <div class="crow"><b>Reasoning over chart and texts<small>Synthesising placements, periods and sources</small></b><div class="cbar"><span class="grow" style="width:100%"></span></div><span class="pct">25%</span></div>
+        <div class="crow"><b>Safety and instruction following<small>Holding medical and crisis policy under pressure</small></b><div class="cbar"><span class="grow" style="width:80%"></span></div><span class="pct">20%</span></div>
+        <div class="crow"><b>Hindi and Hinglish quality<small>Natural, respectful, correct terminology</small></b><div class="cbar"><span class="grow" style="width:60%"></span></div><span class="pct">15%</span></div>
+        <div class="crow"><b>Latency<small>Time to first token under load</small></b><div class="cbar"><span class="grow" style="width:40%"></span></div><span class="pct">10%</span></div>
+        <div class="crow"><b>Cost at scale<small>Per conversation, with prompt caching</small></b><div class="cbar"><span class="grow" style="width:40%"></span></div><span class="pct">10%</span></div>
+        <div class="crow"><b>Tool use and long context<small>Reliable tool calls, structured outputs</small></b><div class="cbar"><span class="grow" style="width:40%"></span></div><span class="pct">10%</span></div>
+        <div class="crow"><b>Azure fit and data controls<small>Billing, networking, retention terms</small></b><div class="cbar"><span class="grow" style="width:40%"></span></div><span class="pct">10%</span></div>
+      </div>
+    </div>
+      <div class="card cand" style="align-self:stretch">
+        <span class="eyebrow">Bake-off protocol · weeks 1–2</span>
+        <ul>
+          <li>300 golden questions across the three domains, with computed charts, answered blind by each candidate</li>
+          <li>120 red-team prompts for medical, crisis and manipulation scenarios</li>
+          <li>Scored by the advisory panel on a 1–5 rubric plus automated fact and safety checks</li>
+          <li>Latency measured on the same harness that will run in production</li>
+        </ul>
+      </div>
+  </div>
+  <div class="cands reveal" style="margin-top:16px">
+      <div class="card cand"><h3>Claude family</h3><ul><li>Strong instruction following and tool use</li><li>Available through Microsoft Foundry, billed on Azure</li><li>Three model tiers for routing</li></ul><p class="role">Provisional choice for all three tiers</p></div>
+      <div class="card cand"><h3>Other frontier APIs</h3><ul><li>GPT and Gemini model families</li><li>Benchmarked on identical prompts</li><li>Kept as qualified fallback options</li></ul><p class="role">Fallback candidate</p></div>
+      <div class="card cand"><h3>Open-weight models</h3><ul><li>Llama, Qwen and Mistral families</li><li>Self-hosted on Azure ML GPUs</li><li>Most control, most operating effort</li></ul><p class="role">Base for any future fine-tune</p></div>
+  </div>
+
+  <h3 class="reveal" style="font-size:18px;margin:56px 0 16px">Provisional routing: three tiers, one orchestration layer</h3>
+  <div class="tiers reveal">
+    <div class="tier t1">
+      <span class="job">Guard &amp; route · every message</span>
+      <span class="model">Claude Haiku 5.5</span>
+      <ul><li>Input and output safety classification</li><li>Domain and language routing</li><li>Handoff briefs, memory summaries, titles</li></ul>
+      <span class="share">≈ 2 calls per turn</span>
+    </div>
+    <div class="tier t2">
+      <span class="job">Converse · every answer</span>
+      <span class="model">Claude Sonnet 5.5</span>
+      <ul><li>The guide's answers, streamed</li><li>Tool calls to chart, knowledge and matcher</li><li>Effort tuned per route to balance depth and speed</li></ul>
+      <span class="share">1 call per turn</span>
+    </div>
+    <div class="tier t3">
+      <span class="job">Depth · on demand</span>
+      <span class="model">Claude Opus 5.5</span>
+      <ul><li>Long-form reports, generated asynchronously</li><li>Complex astrologer co-pilot briefs</li><li>Evaluation judge, calibrated to the panel</li></ul>
+      <span class="share">Reports and evaluation only</span>
+    </div>
+  </div>
+  <p class="small muted reveal" style="margin-top:12px">The orchestration layer is provider-agnostic, so a qualified fallback model can be switched in by configuration.</p>
+</section>
+
+<!-- 06 FINE-TUNING -->
+<section class="sec" id="finetune" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">06 · Fine-tuning strategy</p>
+    <h2>Ground the model first; fine-tune only if the <em class="hl">evidence</em> demands it</h2>
+  </div>
+  <div class="verdict reveal">
+    <div class="card ink" style="padding:32px;gap:16px">
+      <span class="eyebrow" style="color:var(--sun)">Our recommendation</span>
+      <h3>No fine-tuning at launch.</h3>
+      <p>Astrological knowledge changes as the advisory panel reviews it, every chart fact must be exact, and safety rules must be auditable. Retrieval, tools and prompts meet all three needs; trained weights meet none of them well.</p>
+      <div class="grid" style="gap:10px;margin-top:6px">
+        <p><b style="color:#FFF8E2">Exact charts come from tools.</b> A fine-tuned model would still be guessing placements; the ephemeris engine never guesses.</p>
+        <p><b style="color:#FFF8E2">Knowledge stays editable.</b> An approved passage can be added, corrected or withdrawn in minutes and cited in every answer.</p>
+        <p><b style="color:#FFF8E2">Safety stays inspectable.</b> Policies live in versioned prompts and guard rules that are tested on every release.</p>
+      </div>
+    </div>
+    <div class="gate">
+      <div class="gstep"><div><b>Build the grounded baseline</b><p>Prompts, retrieval and tools on the selected model.</p></div></div>
+      <div class="gstep"><div><b>Evaluate on the golden set</b><p>Quality, groundedness, safety, latency and cost against targets.</p></div></div>
+      <div class="gstep"><div><b>Iterate twice on prompts and retrieval</b><p>Most gaps close here, or by fixing the knowledge base.</p></div></div>
+      <div class="gstep"><div><b>Is the remaining gap about style, format or language consistency?</b><p>Knowledge gaps go back to the corpus. Behaviour gaps can justify a fine-tune.</p></div></div>
+      <div class="gstep yes"><div><b>Fine-tune a narrow component</b><p>LoRA adapter on an open-weight model, trained on Azure ML, promoted only if it beats the baseline on the same evaluation.</p></div></div>
+    </div>
+  </div>
+  <div class="grid g2 reveal" style="margin-top:20px">
+    <div class="card"><span class="tag" style="justify-self:start">Candidate A · Phase 3 gate</span><h3>Safety and intent classifier</h3><p>A small open-weight model trained on about 20,000 labelled messages, if guard latency or cost becomes a bottleneck at scale. Labels come from guard verdicts confirmed by the Trust &amp; Quality team.</p></div>
+    <div class="card"><span class="tag" style="justify-self:start">Candidate B · Release 2</span><h3>Regional-language voice adapter</h3><p>Tone and terminology for Tamil and Telugu, trained on consented, de-identified transcripts from Elite-tier astrologers (RUSE ≥ 85) plus exemplars written by the advisory panel.</p></div>
+  </div>
+</section>
+
+</div>
+
+<!-- 07 DATA (band) -->
+<div class="band">
+<div class="wrap">
+<section class="sec" id="data" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">07 · Data preparation</p>
+    <h2>A knowledge base every answer can <em class="hl">cite</em></h2>
+    <p>Seven stages turn classical texts and expert writing into searchable, reviewed and versioned knowledge. Nothing reaches the index without expert approval.</p>
+  </div>
+  <div class="sources reveal" style="margin-bottom:36px">
+    <span class="tag">Classical texts in public-domain translation: Bṛhat Parāśara Horā Śāstra, Phaladīpikā, Sārāvalī</span>
+    <span class="tag">Knowledge cards written by the advisory astrologers</span>
+    <span class="tag">Medical correspondence tables, doctor-reviewed</span>
+    <span class="tag">Wellness practice library, psychologist-reviewed</span>
+    <span class="tag">Platform policies and FAQs</span>
+    <span class="tag">Consented session transcripts (evaluation only)</span>
+  </div>
+  <div class="pipe reveal">
+    <div class="pstage"><div class="node">01</div><b>Source</b><p>Collect texts, cards, tables and practices with licences recorded.</p></div>
+    <div class="pstage"><div class="node">02</div><b>Ingest</b><p>Parse PDF, Word and HTML; OCR scanned texts with Azure Document Intelligence.</p></div>
+    <div class="pstage key"><div class="node">03</div><b>Clean &amp; de-identify</b><p>Normalise IAST transliteration; redact names, phones, dates and places.</p></div>
+    <div class="pstage"><div class="node">04</div><b>Chunk &amp; tag</b><p>300–500 token passages tagged by domain, planet, house, sign, language, risk.</p></div>
+    <div class="pstage key"><div class="node">05</div><b>Expert review</b><p>Two approvals; medical and wellness passages also need the professional advisor.</p></div>
+    <div class="pstage"><div class="node">06</div><b>Embed &amp; index</b><p>Multilingual embeddings in a hybrid keyword and vector index with reranking.</p></div>
+    <div class="pstage"><div class="node">07</div><b>Version &amp; monitor</b><p>Each corpus release versioned; weak passages flagged by thumbs-down data.</p></div>
+  </div>
+  <div class="grid g4 reveal" style="margin-top:44px">
+    <div class="card"><span class="eyebrow">Core</span><b style="font-family:var(--f-display);font-size:40px;font-weight:400;line-height:1">3,500</b><p>approved passages at launch</p></div>
+    <div class="card"><span class="eyebrow">Medical</span><b style="font-family:var(--f-display);font-size:40px;font-weight:400;line-height:1">1,200</b><p>passages, each doctor-reviewed</p></div>
+    <div class="card"><span class="eyebrow">Wellness</span><b style="font-family:var(--f-display);font-size:40px;font-weight:400;line-height:1">1,000</b><p>passages, each psychologist-reviewed</p></div>
+    <div class="card"><span class="eyebrow">Policy</span><b style="font-family:var(--f-display);font-size:40px;font-weight:400;line-height:1">300</b><p>passages on safety, pricing and conduct</p></div>
+  </div>
+</section>
+</div>
+</div>
+
+<div class="wrap">
+
+<!-- 08 EVALUATION -->
+<section class="sec" id="eval" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">08 · Training &amp; evaluation</p>
+    <h2>Measured before release, monitored after</h2>
+    <p>Here “training” means tuning prompts, retrieval and guard thresholds against expert-graded data. The same evaluation suite gates every change and would gate any future fine-tune.</p>
+  </div>
+  <div class="metrics reveal">
+    <div class="metric"><span class="val">≥ 99%</span><span class="lbl">Chart-fact accuracy</span><div class="meter"><span style="width:99%"></span></div><p>Every stated placement, period and date checked automatically against the computed chart.</p></div>
+    <div class="metric"><span class="val">≥ 4.2</span><span class="lbl">Panel quality score, out of 5</span><div class="meter"><span style="width:84%"></span></div><p>Advisory panel rubric: accuracy, depth, tone, usefulness.</p></div>
+    <div class="metric"><span class="val">≥ 95%</span><span class="lbl">Groundedness</span><div class="meter"><span style="width:95%"></span></div><p>Interpretive claims supported by a retrieved, approved passage.</p></div>
+    <div class="metric"><span class="val">≥ 98%</span><span class="lbl">Crisis detection recall</span><div class="meter"><span style="width:98%"></span></div><p>Measured on the red-team set and on reviewed live events.</p></div>
+    <div class="metric"><span class="val">&lt; 0.1%</span><span class="lbl">Unsafe output rate</span><div class="meter"><span style="width:1%"></span></div><p>Diagnosis, medication or fear-selling content reaching a user.</p></div>
+    <div class="metric"><span class="val">≤ 2.0 s</span><span class="lbl">First token, p95</span><div class="meter"><span style="width:70%"></span></div><p>Measured end to end under the week-14 load test.</p></div>
+  </div>
+  <div class="grid g2 reveal" style="margin-top:40px;gap:40px">
+    <div>
+      <h3 style="font-size:18px">Golden set · 1,200 expert-graded questions</h3>
+      <p class="small muted" style="margin:6px 0 14px">Each item pairs a question with a computed chart and a reference answer from the advisory panel. 300 items are ready at the bake-off; the full set by week 6.</p>
+      <div class="stackbar grow"><span class="a" style="flex:480">Core 480</span><span class="b" style="flex:300">Medical 300</span><span class="c" style="flex:270">Wellness 270</span><span class="d" style="flex:150">Hindi 150</span></div>
+      <div class="keys"><span><i style="background:var(--sun-deep)"></i>Core astrology</span><span><i style="background:var(--sun)"></i>Medical astrology</span><span><i style="background:var(--sun-mid)"></i>Mental wellness</span><span><i style="background:var(--sun-soft)"></i>Hindi &amp; Hinglish</span></div>
+    </div>
+    <div>
+      <h3 style="font-size:18px">Red-team set · 500 adversarial prompts</h3>
+      <p class="small muted" style="margin:6px 0 14px">Designed with the clinical psychologist and medical advisor; refreshed every month from live safety events.</p>
+      <div class="rt">
+        <div><span>Self-harm and crisis</span><span class="bar"><span style="width:100%"></span></span><b>120</b></div>
+        <div><span>Diagnosis and medication demands</span><span class="bar"><span style="width:100%"></span></span><b>120</b></div>
+        <div><span>Death, lifespan, fetal sex</span><span class="bar"><span style="width:66.7%"></span></span><b>80</b></div>
+        <div><span>Prompt injection and jailbreaks</span><span class="bar"><span style="width:58.3%"></span></span><b>70</b></div>
+        <div><span>Fear-selling and manipulation</span><span class="bar"><span style="width:50%"></span></span><b>60</b></div>
+        <div><span>Privacy probes</span><span class="bar"><span style="width:41.7%"></span></span><b>50</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid g4 reveal" style="margin-top:40px">
+    <div class="card wash"><h3>Automated checks</h3><p>Fact checker compares every claim with chart data; policy rules scan for diagnosis and medication language.</p></div>
+    <div class="card wash"><h3>Calibrated judge</h3><p>Claude Opus 5.5 grades with the panel's rubric, calibrated to at least 85% agreement on 200 panel-scored items.</p></div>
+    <div class="card wash"><h3>Human panel</h3><p>The advisory panel reviews 100 sampled live conversations each month and every safety event weekly.</p></div>
+    <div class="card wash"><h3>Online signals</h3><p>Thumbs, CSAT, escalation and handoff conversion, with A/B tests for every prompt change.</p></div>
+  </div>
+</section>
+
+<!-- 09 RUSE -->
+<section class="sec" id="ruse" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">09 · RUSE ranking engine</p>
+    <h2>How the RUSE score is <em class="hl">computed</em></h2>
+    <p>Reliability, User feedback, Satisfaction and Expertise, weighted per domain and adjusted for confidence. Try it with the calculator below; the profiles are illustrative.</p>
+  </div>
+  <div class="ruseflow reveal" style="margin-bottom:28px">
+    <span>Session, rating, survey, complaint and assessment events</span><i>→</i>
+    <span>Normalise per domain cohort</span><i>→</i>
+    <span>Weight R · U · S · E</span><i>→</i>
+    <span>Confidence adjustment</span><i>→</i>
+    <span class="k">Tier + nightly snapshot</span><i>→</i>
+    <span>Ranked with live match and availability</span>
+  </div>
+  <div class="calc reveal">
+    <div class="calc-in">
+      <div class="field"><span class="eyebrow">Domain</span>
+        <div class="seg dom" role="group" aria-label="Domain">
+          <button type="button" data-dom="core" aria-pressed="false">Core</button>
+          <button type="button" data-dom="medical" aria-pressed="true">Medical</button>
+          <button type="button" data-dom="wellness" aria-pressed="false">Wellness</button>
+        </div>
+      </div>
+      <div class="field"><label for="rR">Reliability (R) <output id="oR"></output></label><input type="range" id="rR" min="0" max="100" value="82"></div>
+      <div class="field"><label for="rU">User feedback (U) <output id="oU"></output></label><input type="range" id="rU" min="0" max="100" value="88"></div>
+      <div class="field"><label for="rS">Satisfaction (S) <output id="oS2"></output></label><input type="range" id="rS" min="0" max="100" value="91"></div>
+      <div class="field"><label for="rE">Expertise (E) <output id="oE"></output></label><input type="range" id="rE" min="0" max="100" value="94"></div>
+      <div class="field"><label for="rN">Completed sessions (n) <output id="oN"></output></label><input type="range" id="rN" min="0" max="500" value="180"></div>
+      <div class="presets"><span class="small muted" style="align-self:center">Try:</span>
+        <button type="button" data-p="82,88,91,94,180">Seasoned specialist</button>
+        <button type="button" data-p="70,98,96,62,8">Popular newcomer</button>
+        <button type="button" data-p="76,60,58,92,140">Specialist to coach</button>
+        <button type="button" data-p="88,90,89,58,260">Favourite to certify</button>
+      </div>
+    </div>
+    <div class="calc-out">
+      <div class="dial-row">
+        <svg class="dial" viewBox="0 0 150 150" aria-hidden="true">
+          <circle class="bg" cx="75" cy="75" r="62"/>
+          <circle class="fg" id="dialFg" cx="75" cy="75" r="62" stroke-dasharray="389.56" stroke-dashoffset="389.56" transform="rotate(-90 75 75)"/>
+          <text id="dialTxt" x="75" y="84" text-anchor="middle">0</text>
+          <text class="u" x="75" y="104" text-anchor="middle">RUSE ADJ.</text>
+        </svg>
+        <div style="display:grid;gap:10px">
+          <span class="tierbadge" id="tier">Elite</span>
+          <p class="small" style="color:var(--ink-2)" id="tierTxt"></p>
+        </div>
+      </div>
+      <div style="display:grid;gap:8px">
+        <span class="eyebrow">Weighted contributions · raw score <span id="rawTxt" class="mono"></span></span>
+        <div class="contrib" id="contrib"><span class="R"></span><span class="U"></span><span class="S"></span><span class="E"></span><span class="rest"></span></div>
+      </div>
+      <div style="display:grid;gap:8px">
+        <span class="eyebrow">Position in the RUSE Matrix</span>
+        <svg class="qmini" viewBox="0 0 340 240" role="img" aria-label="RUSE Matrix with the current astrologer's position">
+          <rect class="q q2" x="30" y="10" width="210" height="60"/>
+          <rect class="q q1" x="240" y="10" width="90" height="60"/>
+          <rect class="q q4" x="30" y="70" width="210" height="140"/>
+          <rect class="q q3" x="240" y="70" width="90" height="140"/>
+          <text x="38" y="26">Favourites to certify</text>
+          <text x="248" y="26">North Stars</text>
+          <text x="38" y="86">Support plan</text>
+          <text x="248" y="86">Coach</text>
+          <text class="ax" x="240" y="224" text-anchor="middle">70</text>
+          <text class="ax" x="26" y="73" text-anchor="end">70</text>
+          <text class="ax" x="330" y="228" text-anchor="end">EXPERTISE →</text>
+          <text class="ax" x="20" y="210" transform="rotate(-90 20 210)">EXPERIENCE →</text>
+          <g class="pt" id="qpt"><circle class="halo" r="12"/><circle r="6"/></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="grid g3 reveal" style="margin-top:20px">
+    <div class="card"><h3>Confidence adjustment</h3><p><span class="mono small">(n·RUSE + 25·μ) ÷ (n + 25)</span> pulls thin records toward the cohort mean μ (72 here), so one perfect review cannot outrank 400 strong sessions.</p></div>
+    <div class="card"><h3>Recommendation rank</h3><p><span class="mono small">0.55·RUSE + 0.30·Match + 0.15·Availability</span>, with two of every top ten slots reserved for Rising astrologers and a 15% hourly impression cap.</p></div>
+    <div class="card"><h3>Integrity controls</h3><p>Verified-session reviews only, burst and ring detection, immediate hard gates for cure claims or fear-selling, and an audited appeal flow.</p></div>
+  </div>
+</section>
+
+<!-- 10 SYSTEM DESIGN -->
+<section class="sec" id="system" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">10 · System design</p>
+    <h2>Built into the platform you already run</h2>
+    <p>Your backend is a modular NestJS service with application, domain, infrastructure and presentation layers per module. New capabilities follow the same pattern, so your team can maintain them the same way.</p>
+  </div>
+  <div class="modules reveal">
+    <div class="card"><span class="eyebrow">Existing modules · retained</span><div class="modlist"><span class="mod">auth</span><span class="mod">users</span><span class="mod">kundali</span><span class="mod">matchmaking</span><span class="mod">chat</span><span class="mod">wallet</span><span class="mod">payments</span><span class="mod">orders</span><span class="mod">puja</span><span class="mod">contactus</span></div><p class="small">kundali, chat and users are extended; the rest are reused as they are.</p></div>
+    <div class="card"><span class="eyebrow">New modules</span><div class="modlist"><span class="mod new">ai-guide</span><span class="mod new">safety</span><span class="mod new">knowledge</span><span class="mod new">ranking</span><span class="mod new">feedback</span><span class="mod new">reports</span><span class="mod new">notifications</span><span class="mod new">trust-admin</span></div><p class="small">Each owns its collections and exposes typed services; the AI provider sits behind one interface in ai-guide.</p></div>
+  </div>
+  <div class="tables reveal" style="margin-top:20px">
+    <table class="t">
+      <thead><tr><th>Collection</th><th>Purpose</th><th>Key fields</th></tr></thead>
+      <tbody>
+        <tr><td>birthProfiles</td><td>People whose charts a user manages</td><td><code>userId, dob, tob, tobConfidence, place{lat,lng,tz}, consentAt</code></td></tr>
+        <tr><td>charts</td><td>Cached computed charts</td><td><code>birthProfileId, ayanamsa, d1, d9, d10, dasha[], transitsAt, inputHash</code></td></tr>
+        <tr><td>aiConversations</td><td>Guide sessions</td><td><code>userId, domains[], language, memoryOptIn, status</code></td></tr>
+        <tr><td>aiMessages</td><td>Every turn, fully traceable</td><td><code>conversationId, role, content, citations[], guard{in,out}, model, promptVersion, tokens{in,out,cached}, latencyMs, costUsd</code></td></tr>
+        <tr><td>handoffBriefs</td><td>Consented context for astrologers</td><td><code>conversationId, astrologerId, summary, chartHighlights, consentAt</code></td></tr>
+        <tr><td>ruseScores</td><td>Nightly RUSE snapshots</td><td><code>astrologerId, domain, R, U, S, E, raw, adjusted, n, tier, computedAt</code></td></tr>
+        <tr><td>feedback</td><td>Ratings, CSAT and pulses</td><td><code>sessionId, rating, csat, review, sentiment, verified, pulse30d</code></td></tr>
+        <tr><td>safetyEvents</td><td>Crisis and policy events</td><td><code>conversationId, type, severity, action, reviewedBy, reviewedAt</code></td></tr>
+        <tr><td>knowledgeChunks</td><td>Metadata for indexed passages</td><td><code>chunkId, source, domain, tags[], lang, corpusVersion, reviewStatus</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid g3 reveal" style="margin-top:20px">
+    <div class="card"><h3>Privacy by construction</h3><p>Names, phone numbers and emails are removed before any model call. The model receives chart facts, never identity. User data is not used for training without explicit opt-in.</p></div>
+    <div class="card"><h3>Prompt-injection defence</h3><p>Retrieved text and user content are treated as data, tools are allow-listed per route, and structured outputs are validated before they are used.</p></div>
+    <div class="card"><h3>Scale</h3><p>Stateless API instances autoscale; Socket.IO scales out with a Redis adapter; reports run from a queue; prompt and chart caching keep latency and cost down.</p></div>
+  </div>
+</section>
+
+<!-- 11 STACK -->
+<section class="sec" id="stack" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">11 · Technology stack</p>
+    <h2>What stays, what grows, what's new</h2>
+  </div>
+  <div class="stackgrid reveal">
+    <div class="srow"><b>Experience</b><div class="chips2">
+      <span class="tchip">Next.js 15 <span class="st inplace">in place</span></span><span class="tchip">React 19 <span class="st inplace">in place</span></span><span class="tchip">Tailwind CSS 4 <span class="st inplace">in place</span></span><span class="tchip">Redux Toolkit <span class="st inplace">in place</span></span><span class="tchip">next-i18next · en, hi <span class="st ext">extended</span></span><span class="tchip">Socket.IO client <span class="st ext">extended</span></span><span class="tchip">Three.js 3D scenes <span class="st new">new</span></span><span class="tchip">PWA &amp; web push <span class="st new">new</span></span></div></div>
+    <div class="srow"><b>Services</b><div class="chips2">
+      <span class="tchip">NestJS 11 <span class="st inplace">in place</span></span><span class="tchip">MongoDB · Mongoose 8 <span class="st ext">extended</span></span><span class="tchip">Socket.IO gateway <span class="st ext">extended</span></span><span class="tchip">JWT · role guards <span class="st inplace">in place</span></span><span class="tchip">Throttler · Helmet <span class="st inplace">in place</span></span><span class="tchip">Swagger <span class="st inplace">in place</span></span></div></div>
+    <div class="srow"><b>AI</b><div class="chips2">
+      <span class="tchip">Claude Haiku · Sonnet · Opus 5.5 <span class="st new">new</span></span><span class="tchip">Microsoft Foundry <span class="st new">new</span></span><span class="tchip">Anthropic TypeScript SDK (Foundry client) <span class="st new">new</span></span><span class="tchip">Azure AI Search · hybrid + semantic ranker <span class="st new">new</span></span><span class="tchip">Multilingual embeddings <span class="st new">new</span></span><span class="tchip">Azure AI Document Intelligence <span class="st new">new</span></span><span class="tchip">promptfoo evaluation runner <span class="st new">new</span></span></div></div>
+    <div class="srow"><b>Astrology &amp; payments</b><div class="chips2">
+      <span class="tchip">DivineAPI chart engine <span class="st ext">extended</span></span><span class="tchip">Chart cache <span class="st new">new</span></span><span class="tchip">Razorpay <span class="st inplace">in place</span></span><span class="tchip">Wallet &amp; per-minute billing <span class="st inplace">in place</span></span></div></div>
+    <div class="srow"><b>Cloud &amp; operations</b><div class="chips2">
+      <span class="tchip">Azure App Service <span class="st inplace">in place</span></span><span class="tchip">Azure Pipelines <span class="st ext">extended</span></span><span class="tchip">Azure Cache for Redis <span class="st new">new</span></span><span class="tchip">Azure Service Bus <span class="st new">new</span></span><span class="tchip">Container Apps jobs <span class="st new">new</span></span><span class="tchip">Blob Storage <span class="st new">new</span></span><span class="tchip">Key Vault <span class="st new">new</span></span><span class="tchip">Application Insights · OpenTelemetry <span class="st new">new</span></span></div></div>
+  </div>
+</section>
+
+<!-- 12 DEPLOY -->
+<section class="sec" id="deploy" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">12 · Deployment &amp; LLMOps</p>
+    <h2>Every change passes the evaluation gate</h2>
+    <p>Prompts, knowledge releases and model versions are deployed like code: versioned, reviewed, tested and rolled out gradually with instant rollback.</p>
+  </div>
+  <div class="cicd reveal">
+    <div class="cstep"><span class="mono">COMMIT</span><b>Pull request</b><small>Code, prompt or corpus change</small></div>
+    <div class="cstep"><span class="mono">BUILD</span><b>Build &amp; unit tests</b><small>Ranking and safety coverage ≥ 80%</small></div>
+    <div class="cstep gate"><span class="mono">GATE</span><b>Evaluation gate</b><small>Golden + red-team; blocks on a drop over 2 points or any safety regression</small></div>
+    <div class="cstep"><span class="mono">STAGING</span><b>Deploy &amp; smoke</b><small>End-to-end tests, load sample</small></div>
+    <div class="cstep"><span class="mono">CANARY</span><b>Staged rollout</b><small>5% → 25% → 100%</small></div>
+    <div class="cstep"><span class="mono">OBSERVE</span><b>Monitor</b><small>Latency, cost, guard verdicts, thumbs</small></div>
+  </div>
+  <div class="grid g2 reveal" style="margin-top:20px">
+    <div class="card">
+      <h3>Canary rollout</h3>
+      <p>Each release reaches a growing share of conversations while live metrics are compared with the previous version.</p>
+      <div class="canary" aria-hidden="true"><span style="height:18%">5%</span><span style="height:38%">25%</span><span style="height:70%">50%</span><span style="height:100%">100%</span></div>
+    </div>
+    <div class="card">
+      <h3>Environments &amp; alerts</h3>
+      <p>Development, staging and production on Azure, with data stores in an India region. Alerts page the Trust &amp; Quality lead for crisis events and the on-call engineer for error, latency or cost spikes. Every message records its model and prompt version.</p>
+    </div>
+  </div>
+  <h3 class="reveal" style="font-size:18px;margin:36px 0 14px">Weekly improvement loop</h3>
+  <div class="loop reveal">
+    <div><b>Observe</b>Dashboards and sampled transcripts</div>
+    <div><b>Triage</b>Thumbs-down, safety events, failed intents</div>
+    <div><b>Improve</b>Knowledge, prompts or guard rules</div>
+    <div><b>Evaluate</b>Golden and red-team sets</div>
+    <div><b>Release</b>Through the gate and canary</div>
+  </div>
+</section>
+
+<!-- 13 ROADMAP -->
+<section class="sec" id="roadmap" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">13 · Roadmap &amp; milestones</p>
+    <h2>16 weeks to <em class="hl">public launch</em></h2>
+    <p>Five phases, ten workstreams and five milestones, each with clear exit criteria.</p>
+  </div>
+  <div class="gantt-wrap reveal" tabindex="0" aria-label="Gantt chart of the 16-week delivery plan">
+    <div class="gantt" id="gantt">
+      <div class="gh" style="text-align:left;padding-left:14px">Workstream</div>
+      <div class="ph p0" style="grid-column:2 / 4" title="Weeks 1–2">P0 Discovery</div>
+      <div class="ph p1" style="grid-column:4 / 8" title="Weeks 3–6">P1 Foundation &amp; core AI</div>
+      <div class="ph p2" style="grid-column:8 / 12" title="Weeks 7–10">P2 Medical &amp; wellness</div>
+      <div class="ph p3" style="grid-column:12 / 15" title="Weeks 11–13">P3 Personalise</div>
+      <div class="ph p4" style="grid-column:15 / 18" title="Weeks 14–16">P4 Launch</div>
+    </div>
+  </div>
+  <div class="mstones reveal" style="margin-top:20px">
+    <div class="mstone"><span class="wk">M0 · Week 2</span><b>Model decision</b><ul><li>Bake-off report and model choice</li><li>Golden set v0, 300 items</li><li>UX prototypes for the guide and discovery</li></ul></div>
+    <div class="mstone"><span class="wk">M1 · Week 6</span><b>Internal beta</b><ul><li>Core astrology guide on staging</li><li>Chart facts ≥ 99% on the golden set</li><li>First token p95 ≤ 2.5 s</li></ul></div>
+    <div class="mstone"><span class="wk">M2 · Week 10</span><b>Closed beta</b><ul><li>500 users and 50 astrologers</li><li>Medical and wellness domains live</li><li>Crisis recall ≥ 98%; RUSE ranking live</li></ul></div>
+    <div class="mstone"><span class="wk">M3 · Week 13</span><b>Feature complete</b><ul><li>All Must and Should requirements</li><li>Hindi panel score ≥ 4.0</li><li>Co-pilot in use by beta astrologers</li></ul></div>
+    <div class="mstone final"><span class="wk">M4 · Week 16</span><b>Public launch</b><ul><li>Penetration test findings closed</li><li>DPDP compliance review complete</li><li>10,000-chat load test passed</li></ul></div>
+  </div>
+</section>
+
+<!-- 14 TEAM -->
+<section class="sec" id="team" data-sec>
+  <div class="sec-head reveal">
+    <p class="eyebrow">14 · Team</p>
+    <h2>A focused team with domain experts at the table</h2>
+  </div>
+  <div class="team reveal">
+    <div class="role"><span class="n">1</span><b>Delivery lead &amp; analyst</b><span>Scope, backlog, delivery</span></div>
+    <div class="role"><span class="n">1</span><b>Solution architect</b><span>Architecture, security, scale</span></div>
+    <div class="role"><span class="n">1</span><b>AI engineer</b><span>Orchestration, guards, evaluation</span></div>
+    <div class="role"><span class="n">1</span><b>Knowledge &amp; data engineer</b><span>Pipeline, search, corpus releases</span></div>
+    <div class="role"><span class="n">2</span><b>Backend engineers</b><span>NestJS modules, RUSE, integrations</span></div>
+    <div class="role"><span class="n">2</span><b>Frontend engineers</b><span>Guide UI, consoles, 3D website</span></div>
+    <div class="role"><span class="n">1</span><b>Product &amp; motion designer</b><span>White-and-yellow identity, UX</span></div>
+    <div class="role"><span class="n">1</span><b>QA automation engineer</b><span>Test suites, load, regression</span></div>
+    <div class="role panel2"><span class="n">3</span><b>Senior astrologers</b><span>Core, medical, wellness · part time</span></div>
+    <div class="role panel2"><span class="n">1</span><b>Clinical psychologist</b><span>Wellness content, crisis protocol</span></div>
+    <div class="role panel2"><span class="n">1</span><b>Medical doctor</b><span>Medical boundaries and review</span></div>
+    <div class="role panel2"><span class="n">½</span><b>DevOps engineer</b><span>Pipelines, environments, monitoring</span></div>
+  </div>
+  <div class="card wash reveal" style="margin-top:20px"><h3>Top risks we are managing</h3><p>Health advice taken as medical care, wrong chart facts, review gaming, provider changes and Hindi quality. Each has a mitigation in BRD section 13.</p></div>
+</section>
+
+<!-- NEXT -->
+<section class="sec" id="next">
+  <div class="next reveal">
+    <div>
+      <p class="eyebrow" style="color:var(--sun)">Getting started</p>
+      <h2>What happens in week one</h2>
+      <p>Phase 0 starts with four parallel tracks, and the model choice lands at the end of week two.</p>
+      <a class="btn sun" href="brd.html">Read the BRD →</a>
+    </div>
+    <ol>
+      <li><div><b>Environments go live</b><span>Claude models on Microsoft Foundry, plus development and staging on Azure.</span></div></li>
+      <li><div><b>Golden set v0 begins</b><span>The first 300 expert-answered questions with computed charts.</span></div></li>
+      <li><div><b>Model bake-off starts</b><span>Candidates run on the evaluation harness against the golden set.</span></div></li>
+      <li><div><b>UX prototypes take shape</b><span>The guide chat, discovery and handoff in the white-and-yellow identity.</span></div></li>
+    </ol>
+  </div>
+</section>
+
+</div>
+
+<footer class="end">
+  <span>AstroPlanet · Technical Implementation Blueprint · v1.0</span>
+  <span>Timings and volumes are planning estimates, refined in Phase 0.</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var finePointer = window.matchMedia("(pointer: fine)").matches;
+
+/* ---------- Progress + dot nav ---------- */
+var bar=document.getElementById("progress");
+function onScroll(){var h=document.documentElement;var p=h.scrollTop/((h.scrollHeight-h.clientHeight)||1);bar.style.transform="scaleX("+Math.min(1,Math.max(0,p))+")";}
+window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+var dots=[].slice.call(document.querySelectorAll("#dots a")), dmap={};
+dots.forEach(function(a){dmap[a.getAttribute("href").slice(1)]=a;});
+if("IntersectionObserver" in window){
+  var dio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){dots.forEach(function(d){d.classList.remove("active")});var a=dmap[e.target.id];if(a)a.classList.add("active");}});},{rootMargin:"-40% 0px -55% 0px"});
+  document.querySelectorAll("[data-sec]").forEach(function(s){dio.observe(s)});
+}
+
+/* ---------- Tilt cards ---------- */
+if(finePointer && !reduce){
+  document.querySelectorAll(".tilt").forEach(function(el){
+    el.addEventListener("pointermove",function(e){var r=el.getBoundingClientRect();var x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;el.style.setProperty("--ry",(x*10).toFixed(2)+"deg");el.style.setProperty("--rx",(-y*10).toFixed(2)+"deg");});
+    el.addEventListener("pointerleave",function(){el.style.setProperty("--ry","0deg");el.style.setProperty("--rx","0deg");});
+  });
+}
+
+/* ---------- 3D hero ---------- */
+(function hero(){
+  var host=document.getElementById("cosmos");
+  if(!window.THREE) return;
+  var renderer;
+  try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){return;}
+  if(!renderer.getContext()) return;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setClearColor(0xffffff,0);
+  host.insertBefore(renderer.domElement,host.firstChild);
+  host.classList.add("ready");
+
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(36,1,0.1,100);
+  scene.add(new THREE.AmbientLight(0xffffff,0.8));
+  var dl=new THREE.DirectionalLight(0xffffff,0.75);dl.position.set(4,7,8);scene.add(dl);
+  var pl=new THREE.PointLight(0xffc21a,1.3,14);scene.add(pl);
+
+  var world=new THREE.Group();scene.add(world);
+  var tilt=new THREE.Group();tilt.rotation.x=0.38;tilt.rotation.z=-0.16;world.add(tilt);
+
+  function radial(inner,outer){var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d");var g=x.createRadialGradient(128,128,0,128,128,128);g.addColorStop(0,inner);g.addColorStop(1,outer);x.fillStyle=g;x.fillRect(0,0,256,256);return new THREE.CanvasTexture(c);}
+  function ring(r,opacity,dashed){var pts=[];for(var i=0;i<=240;i++){var a=i/240*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r));}var geo=new THREE.BufferGeometry().setFromPoints(pts);var mat=dashed?new THREE.LineDashedMaterial({color:0x1a1608,transparent:true,opacity:opacity,dashSize:0.07,gapSize:0.11}):new THREE.LineBasicMaterial({color:0x1a1608,transparent:true,opacity:opacity});var l=new THREE.Line(geo,mat);if(dashed)l.computeLineDistances();return l;}
+
+  // Sun and glow
+  var sun=new THREE.Mesh(new THREE.SphereGeometry(0.88,64,64),new THREE.MeshStandardMaterial({color:0xffc21a,emissive:0xf2a900,emissiveIntensity:0.55,roughness:0.38,metalness:0.05}));
+  tilt.add(sun);
+  var halo=new THREE.Sprite(new THREE.SpriteMaterial({map:radial("rgba(255,194,26,0.6)","rgba(255,194,26,0)"),depthWrite:false,transparent:true}));
+  halo.scale.set(4.4,4.4,1);tilt.add(halo);
+
+  // Zodiac band with 12 divisions and sidereal names
+  var band=new THREE.Mesh(new THREE.RingGeometry(3.25,3.78,180,1),new THREE.MeshBasicMaterial({color:0xfff1c2,side:THREE.DoubleSide,transparent:true,opacity:0.92,depthWrite:false}));
+  band.rotation.x=-Math.PI/2;tilt.add(band);
+  tilt.add(ring(3.25,0.5));tilt.add(ring(3.78,0.85));
+  var names=["MEṢA","VṚṢABHA","MITHUNA","KARKA","SIṂHA","KANYĀ","TULĀ","VṚŚCIKA","DHANU","MAKARA","KUMBHA","MĪNA"];
+  for(var i=0;i<12;i++){
+    var a=i/12*Math.PI*2;
+    var g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(Math.cos(a)*3.25,0,Math.sin(a)*3.25),new THREE.Vector3(Math.cos(a)*3.78,0,Math.sin(a)*3.78)]);
+    tilt.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0x1a1608,transparent:true,opacity:0.55})));
+  }
+  function addLabels(){
+    for(var i=0;i<12;i++){
+      var a=(i+0.5)/12*Math.PI*2;
+      var c=document.createElement("canvas");c.width=512;c.height=112;var x=c.getContext("2d");
+      x.font="500 46px 'JetBrains Mono', ui-monospace, monospace";x.fillStyle="#4A4535";x.textAlign="center";x.textBaseline="middle";x.fillText(names[i],256,58);
+      var s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));
+      s.position.set(Math.cos(a)*4.3,0,Math.sin(a)*4.3);s.scale.set(1.15,0.25,1);tilt.add(s);
+    }
+  }
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(addLabels);}else{addLabels();}
+
+  // Armillary great circles
+  var arm=new THREE.Group();world.add(arm);
+  var tmat=new THREE.MeshBasicMaterial({color:0x1a1608,transparent:true,opacity:0.28});
+  [[0,0],[Math.PI/2,0],[Math.PI/2,Math.PI/3]].forEach(function(rz){var t=new THREE.Mesh(new THREE.TorusGeometry(2.55,0.007,6,220),tmat);t.rotation.x=rz[0];t.rotation.y=rz[1];arm.add(t);});
+
+  // Grahas on orbits
+  var grahas=[{r:1.45,s:1.5,z:0.08,c:0xbdb59c},{r:1.78,s:1.15,z:0.075,c:0x4a4535},{r:2.08,s:0.9,z:0.1,c:0xe9d9aa},{r:2.38,s:0.68,z:0.095,c:0xc2563a},{r:2.72,s:0.42,z:0.16,c:0xd99a00},{r:3.02,s:0.3,z:0.13,c:0x1a1608,ringed:true}];
+  var bodies=grahas.map(function(gr,idx){
+    tilt.add(ring(gr.r,0.22,true));
+    var m=new THREE.Mesh(new THREE.SphereGeometry(gr.z,32,32),new THREE.MeshStandardMaterial({color:gr.c,roughness:0.6}));
+    if(gr.ringed){var rr=new THREE.Mesh(new THREE.RingGeometry(gr.z*1.5,gr.z*2.2,48),new THREE.MeshBasicMaterial({color:0x1a1608,side:THREE.DoubleSide,transparent:true,opacity:0.55}));rr.rotation.x=-1.2;m.add(rr);}
+    tilt.add(m);return {m:m,r:gr.r,s:gr.s,p:idx*1.7};
+  });
+
+  // Star dust
+  var N=650,pos=new Float32Array(N*3);
+  for(var k=0;k<N;k++){var rr=5.5+Math.random()*7,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);pos[k*3]=rr*Math.sin(ph)*Math.cos(th);pos[k*3+1]=rr*Math.cos(ph)*0.6;pos[k*3+2]=rr*Math.sin(ph)*Math.sin(th);}
+  var pg=new THREE.BufferGeometry();pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  var dust=new THREE.Points(pg,new THREE.PointsMaterial({color:0xd9b44a,size:0.045,transparent:true,opacity:0.8,depthWrite:false}));
+  world.add(dust);
+
+  // Interaction: pointer parallax plus drag-to-spin
+  var tx=0,ty=0,cx=0,cy=0,spin=0,vel=0,drag=false,lastX=0;
+  host.addEventListener("pointermove",function(e){var r=host.getBoundingClientRect();ty=((e.clientX-r.left)/r.width-.5)*0.45;tx=((e.clientY-r.top)/r.height-.5)*0.25;if(drag){vel+=(e.clientX-lastX)*0.0006;lastX=e.clientX;}});
+  host.addEventListener("pointerdown",function(e){drag=true;lastX=e.clientX;});
+  window.addEventListener("pointerup",function(){drag=false;});
+  host.addEventListener("pointerleave",function(){tx=ty=0;});
+
+  function size(){var w=host.clientWidth||1,h=host.clientHeight||1;renderer.setSize(w,h,false);camera.aspect=w/h;var d=w/h<1.05?13.2:10.6;camera.position.set(0,1.5,d);camera.lookAt(0,0,0);camera.updateProjectionMatrix();}
+  size();
+  if("ResizeObserver" in window){new ResizeObserver(function(){size();if(reduce)draw(5);}).observe(host);}else{window.addEventListener("resize",size);}
+
+  function update(t){
+    bodies.forEach(function(b){var a=b.p+t*b.s*0.35;b.m.position.set(Math.cos(a)*b.r,0,Math.sin(a)*b.r);});
+    arm.rotation.y=t*0.06;arm.rotation.z=Math.sin(t*0.1)*0.08;
+    spin+=vel;vel*=0.94;cx+=(tx-cx)*0.05;cy+=(ty-cy)*0.05;
+    world.rotation.y=t*0.04+spin+cy;world.rotation.x=cx;
+    dust.rotation.y=-t*0.01;
+    var s=4.4+Math.sin(t*1.2)*0.18;halo.scale.set(s,s,1);
+  }
+  function draw(t){update(t);renderer.render(scene,camera);}
+  if(reduce){draw(5);return;}
+  var clock=new THREE.Clock(),t=5,running=true,raf=0;
+  function frame(){t+=Math.min(clock.getDelta(),0.05);draw(t);raf=requestAnimationFrame(frame);}
+  frame();
+  if("IntersectionObserver" in window){new IntersectionObserver(function(es){var vis=es[0].isIntersecting;if(vis&&!running){running=true;clock.getDelta();frame();}else if(!vis&&running){running=false;cancelAnimationFrame(raf);}}).observe(host);}
+})();
+
+/* ---------- Architecture ---------- */
+var LAYERS=[
+  {k:"L1",name:"Experience",sub:"what users and teams touch",items:[
+    ["web","Web app & PWA","ext","The existing Next.js site gains the AI guide, RUSE-ranked discovery and the white-and-yellow identity, and can be installed as a PWA for push alerts.",["Next.js 15","React 19","Tailwind 4"]],
+    ["chatui","Guide chat UI","new","Streaming chat with citations, a “Why this answer” panel, handoff cards and calm safety states. Reuses the existing chat bubbles and socket client.",["React","Socket.IO client"]],
+    ["astro","Astrologer console","ext","The current astrologer dashboard plus RUSE scores, improvement tips and the AI pre-session brief.",["Next.js","RUSE API"]],
+    ["trust","Trust console","new","RUSE leaderboard, RUSE Matrix, safety review queue, complaints and audited overrides for the Trust & Quality team.",["Next.js","Role-based access"]]]},
+  {k:"L2",name:"Gateway",sub:"your NestJS backend",items:[
+    ["api","NestJS API","inplace","The existing modular API keeps auth, users, kundali, chat, wallet and payments. New modules follow the same application, domain, infrastructure and presentation layout.",["NestJS 11","Swagger"]],
+    ["socket","Realtime gateway","ext","The existing Socket.IO gateway also streams AI responses sentence by sentence. A Redis adapter lets it scale across instances.",["Socket.IO","Redis adapter"]],
+    ["auth","Auth & quotas","ext","JWT auth and role guards for customers, astrologers and admins, extended with per-plan AI quotas on top of the existing throttling.",["JWT","Throttler","Helmet"]]]},
+  {k:"L3",name:"AI orchestrator",sub:"new ai-guide and safety modules",items:[
+    ["guardIn","Input guard","new","Classifies crisis risk, medical red flags and prompt injection before anything else runs, and strips personal identifiers from the message.",["Claude Haiku 5.5","Rules"]],
+    ["router","Domain router","new","Tags the message as core, medical or wellness, detects the language mix, and decides which tools are needed. Structured outputs keep it predictable.",["Claude Haiku 5.5","Structured outputs"]],
+    ["context","Context builder","new","Assembles the system prompt, chart facts, retrieved passages, memory and history in a cache-friendly order, so repeated content is reused and responses stay fast.",["TypeScript","Prompt caching"]],
+    ["gen","Response generator","new","Writes the answer from chart facts and approved passages only, calling tools as needed, and streams it through the output guard.",["Claude Sonnet 5.5","Opus 5.5 for reports"]],
+    ["guardOut","Output guard","new","Checks every stated placement against the computed chart, blocks diagnosis and medication language, and makes sure required guidance is present.",["Rules engine","Claude Haiku 5.5"]],
+    ["handoff","Handoff planner","new","Applies the escalation rules from the BRD and drafts the brief the astrologer sees once the user consents.",["Claude Haiku 5.5","RUSE matcher"]]]},
+  {k:"L4",name:"Tools & intelligence",sub:"called by the orchestrator",items:[
+    ["chart","Chart engine","ext","The existing kundali module and DivineAPI compute charts, dashas and transits. Results are cached per birth profile so repeat questions are instant.",["DivineAPI","MongoDB cache"]],
+    ["search","Knowledge retrieval","new","Hybrid keyword and vector search over advisor-approved passages, with semantic reranking and filters by domain and language.",["Azure AI Search","Multilingual embeddings"]],
+    ["ruse","RUSE matcher","new","Reads the nightly RUSE snapshot and live presence to rank astrologers for this specific question.",["NestJS","Redis presence"]],
+    ["memory","User memory","new","An opt-in summary of goals and recurring themes that the user can view, edit and delete.",["MongoDB","Claude Haiku 5.5"]],
+    ["reports","Report builder","new","Long-form reports generated from a queue and rendered to PDF, so heavy work never slows the chat.",["Service Bus","Claude Opus 5.5"]]]},
+  {k:"L5",name:"Models",sub:"through Microsoft Foundry",items:[
+    ["haiku","Claude Haiku 5.5","new","Fast, lightweight model for guards, routing and summaries. Runs about twice per conversational turn.",["Microsoft Foundry"]],
+    ["sonnet","Claude Sonnet 5.5","new","The main conversational model behind the guide's answers.",["Microsoft Foundry","Streaming"]],
+    ["opus","Claude Opus 5.5","new","Reserved for deep reports, complex co-pilot briefs and the evaluation judge.",["Microsoft Foundry"]],
+    ["embed","Embeddings","new","A multilingual embedding model chosen in the bake-off for Hindi and English retrieval quality.",["Foundry model catalog"]]]},
+  {k:"L6",name:"Data & operations",sub:"Azure",items:[
+    ["mongo","MongoDB","ext","Operational data, plus new collections for charts, conversations, RUSE scores, feedback and safety events.",["Mongoose 8"]],
+    ["redis","Redis","new","Presence, socket fan-out, rate limits and the hot chart cache.",["Azure Cache for Redis"]],
+    ["vault","Key Vault","new","Secrets and keys, so no credential ever sits in configuration.",["Azure Key Vault"]],
+    ["obs","Observability","new","A trace for every AI call with tokens, cost, latency and guard verdicts, plus dashboards and alerts.",["OpenTelemetry","Application Insights"]],
+    ["evals","Evaluation store","new","Golden and red-team sets, run history, judge scores and release-gate results.",["promptfoo","Blob Storage"]]]}
+];
+var STATUS={inplace:"In place",ext:"Extended",new:"New"};
+var stack=document.getElementById("stack"), panel=document.getElementById("panel"), byId={};
+var html="";
+LAYERS.forEach(function(L,i){
+  html+='<div class="layer" style="--i:'+i+'"><div class="layer-label"><span class="mono">'+L.k+'</span>'+L.name+' <small>'+L.sub+'</small></div><div class="chips">';
+  L.items.forEach(function(it){byId[it[0]]={it:it,L:L};html+='<button type="button" class="chip" data-id="'+it[0]+'" aria-pressed="false"><span class="sd '+it[2]+'"></span>'+it[1]+'</button>';});
+  html+='</div></div>';
+  if(i<LAYERS.length-1) html+='<div class="conn" aria-hidden="true"><i></i><i></i><i></i></div>';
+});
+stack.innerHTML=html;
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function select(id){
+  var o=byId[id]; if(!o) return;
+  stack.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",c.getAttribute("data-id")===id?"true":"false");});
+  var it=o.it;
+  panel.innerHTML='<div class="panel-swap" style="display:grid;gap:14px"><span class="eyebrow">'+o.L.k+' · '+o.L.name+'</span><h3>'+esc(it[1])+'</h3><span class="st '+it[2]+'">'+STATUS[it[2]]+'</span><p>'+esc(it[3])+'</p><div class="tech">'+it[4].map(function(t){return "<span>"+esc(t)+"</span>";}).join("")+'</div></div>';
+}
+stack.addEventListener("click",function(e){var b=e.target.closest(".chip");if(b)select(b.getAttribute("data-id"));});
+select("gen");
+var stage=document.getElementById("stage"), v3d=document.getElementById("v3d"), vflat=document.getElementById("vflat");
+function setView(is3d){stage.classList.toggle("is3d",is3d);v3d.setAttribute("aria-pressed",String(is3d));vflat.setAttribute("aria-pressed",String(!is3d));}
+v3d.addEventListener("click",function(){setView(true)});vflat.addEventListener("click",function(){setView(false)});
+if(reduce||window.innerWidth<700) setView(false);
+if(finePointer&&!reduce){
+  stage.addEventListener("pointermove",function(e){var r=stage.getBoundingClientRect();stage.style.setProperty("--py",(((e.clientX-r.left)/r.width-.5)*10).toFixed(2)+"deg");stage.style.setProperty("--px",(-((e.clientY-r.top)/r.height-.5)*8).toFixed(2)+"deg");});
+  stage.addEventListener("pointerleave",function(){stage.style.setProperty("--py","0deg");stage.style.setProperty("--px","0deg");});
+}
+
+/* ---------- Request journey ---------- */
+var J=[
+  {t:"Input guard",m:"Claude Haiku 5.5",ms:150,s:"Checking your message…",d:"<b>Verdict: medical-sensitive, no crisis.</b> Prompt-injection check passes. Personal identifiers are stripped before anything reaches a model."},
+  {t:"Domain router",m:"Claude Haiku 5.5",ms:180,s:"Understanding your question…",d:"<b>Domains: medical + wellness. Language: English.</b> Chart and knowledge tools required; no report requested."},
+  {t:"Chart engine",m:"Kundali service · DivineAPI",ms:120,s:"Reading your chart…",d:"<b>Cached chart loaded.</b> Saturn Mahadasha since March 2026, Saturn in the 6th house, Moon in Scorpio. Placements are computed, never generated."},
+  {t:"Knowledge retrieval",m:"Azure AI Search · hybrid",ms:240,s:"Looking up trusted sources…",d:"<b>Six approved passages retrieved:</b> Saturn significations, the 6th house, Moon and mind, and two wellness practices from the psychologist-reviewed library."},
+  {t:"Response generation",m:"Claude Sonnet 5.5 · streaming",ms:900,s:"Writing…",d:"<b>The answer is written from chart facts and passages only</b>, with citations, in a warm and non-fatalistic tone. Tokens stream as they are generated."},
+  {t:"Output guard",m:"Rules + Claude Haiku 5.5",ms:160,s:"Checking the answer…",d:"<b>Every sentence is checked before it is shown.</b> Placements match the chart, there is no diagnosis or medication advice, and doctor guidance is present."},
+  {t:"Next best action",m:"RUSE matcher",ms:90,s:"Finding a specialist…",d:"<b>Medical depth is likely useful</b>, so the guide offers a medical-astrology specialist ranked by RUSE, with price and availability, alongside the answer."}
+];
+var ANSWER=["Saturn’s Mahadasha is traditionally a period when energy feels heavier and progress asks for patience. In your chart Saturn sits in the 6th house, which classical texts link with daily routines and health habits, so this period is read as favouring steady routines over pushing hard.","Weeks of exhaustion and low mood deserve proper attention, so please see a doctor. Persistent tiredness has many common, treatable causes.","Alongside that, a fixed sleep time and a ten-minute wind-down each evening are the practices traditionally recommended in Saturn periods. Would you like a gentle routine for this week?"];
+var CITES='<div class="cites"><span>BPHS · Saturn</span><span>Advisor card · 6th house</span><span>Wellness library · sleep</span></div>';
+var HAND='<div class="handoff fade-in"><div class="av2">M</div><div><b>Meera Iyer · Medical astrology</b><small>Elite · RUSE 91 · ₹35/min · online now</small></div><button class="go" type="button" tabindex="-1">Start chat</button></div>';
+var jSteps=document.getElementById("jSteps"), jDetail=document.getElementById("jDetail"), jLat=document.getElementById("jLat"), jAns=document.getElementById("jAnswer"), jStatus=document.getElementById("jStatus"), jHand=document.getElementById("jHandoff"), jPlay=document.getElementById("jPlay");
+jSteps.innerHTML=J.map(function(s,i){return '<li><button type="button" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span><b>'+s.t+'</b><small>'+s.m+'</small></span><span class="ms">'+s.ms+' ms</span></button></li>';}).join("");
+jLat.innerHTML=J.map(function(s){return '<span style="flex:'+s.ms+'" title="'+s.t+' · '+s.ms+' ms">'+(s.ms>=150?s.ms:"")+'</span>';}).join("");
+var lis=[].slice.call(jSteps.children), segs=[].slice.call(jLat.children), timers=[];
+function mark(i,doneUpTo){lis.forEach(function(li,k){li.classList.toggle("done",k<=doneUpTo&&k!==i);li.classList.toggle("cur",k===i);});segs.forEach(function(s,k){s.classList.toggle("on",k<=Math.max(i,doneUpTo));});jDetail.innerHTML=J[i].d;}
+function full(){jAns.innerHTML=ANSWER.map(function(p){return "<p>"+p+"</p>";}).join("")+CITES;jHand.innerHTML=HAND;jStatus.classList.remove("live");jStatus.textContent="Answered in 1.75 s · 3 sources";}
+function clearT(){timers.forEach(clearTimeout);timers=[];}
+function rest(sel){clearT();full();mark(sel,J.length-1);}
+jSteps.addEventListener("click",function(e){var b=e.target.closest("button");if(b)rest(+b.getAttribute("data-i"));});
+rest(4);
+jPlay.addEventListener("click",function(){
+  clearT();
+  if(reduce){rest(J.length-1);return;}
+  jAns.innerHTML="";jHand.innerHTML="";jStatus.classList.add("live");
+  var at=0;
+  J.forEach(function(s,i){
+    timers.push(setTimeout(function(){mark(i,i-1);jStatus.textContent=s.s;if(i===4) type();},at));
+    at+= i===4 ? 2600 : Math.max(650,s.ms*2.2);
+  });
+  timers.push(setTimeout(function(){full();mark(J.length-1,J.length-1);},at+200));
+});
+function type(){
+  var words=ANSWER.join(" ¶ ").split(" "), out=[""], k=0;
+  (function step(){
+    if(k>=words.length) return;
+    var w=words[k++]; if(w==="¶"){out.push("");}else{out[out.length-1]+=(out[out.length-1]?" ":"")+w;}
+    jAns.innerHTML=out.map(function(p){return "<p>"+p+"</p>";}).join("");
+    timers.push(setTimeout(step,24));
+  })();
+}
+
+/* ---------- RUSE calculator ---------- */
+function fill(el){var p=(el.value-el.min)/(el.max-el.min)*100;el.style.setProperty("--fill",p+"%");}
+var W={core:[.25,.25,.25,.25],medical:[.20,.15,.20,.45],wellness:[.20,.20,.35,.25]}, MU=72, K=25;
+function ruse(dom,R,U,S,E,n){
+  var w=W[dom], parts=[w[0]*R,w[1]*U,w[2]*S,w[3]*E], raw=parts[0]+parts[1]+parts[2]+parts[3];
+  var adj=(n*raw+K*MU)/(n+K);
+  var tier= n<K ? "Rising" : adj>=85 ? "Elite" : adj>=70 ? "Trusted" : adj>=55 ? "Developing" : "Under review";
+  var exp=(U+S)/2, quad= E>=70 ? (exp>=70?"North Stars":"Specialists to coach") : (exp>=70?"Favourites to certify":"Support plan");
+  return {parts:parts,raw:raw,adj:adj,tier:tier,quad:quad,exp:exp};
+}
+var dom="medical", rIn={R:document.getElementById("rR"),U:document.getElementById("rU"),S:document.getElementById("rS"),E:document.getElementById("rE"),N:document.getElementById("rN")};
+var TIERTXT={"Elite":"Top placement and the Elite badge.","Trusted":"Full visibility in search and recommendations.","Developing":"Shown in search; recommended when the match is strong.","Under review":"Reduced visibility and a 30-day coaching plan.","Rising":"Fewer than 25 sessions: protected exploration slots until there is enough data."};
+var TIERCLS={"Elite":"","Trusted":"trusted","Developing":"dev","Under review":"review","Rising":"rising"};
+function calcRuse(){
+  Object.keys(rIn).forEach(function(k){fill(rIn[k]);});
+  var R=+rIn.R.value,U=+rIn.U.value,S=+rIn.S.value,E=+rIn.E.value,n=+rIn.N.value;
+  document.getElementById("oR").textContent=R;document.getElementById("oU").textContent=U;document.getElementById("oS2").textContent=S;document.getElementById("oE").textContent=E;document.getElementById("oN").textContent=n;
+  var r=ruse(dom,R,U,S,E,n);
+  document.getElementById("dialTxt").textContent=r.adj.toFixed(1);
+  document.getElementById("dialFg").style.strokeDashoffset=(389.56*(1-r.adj/100)).toFixed(2);
+  var tb=document.getElementById("tier");tb.textContent=r.tier;tb.className="tierbadge "+TIERCLS[r.tier];
+  document.getElementById("tierTxt").textContent=TIERTXT[r.tier]+" Matrix: "+r.quad+".";
+  document.getElementById("rawTxt").textContent=r.raw.toFixed(1);
+  var cs=document.getElementById("contrib").children, L=["R","U","S","E"];
+  for(var i=0;i<4;i++){cs[i].style.flexGrow=r.parts[i];cs[i].textContent=r.parts[i]>=7?L[i]+" "+r.parts[i].toFixed(1):"";}
+  cs[4].style.flexGrow=Math.max(0,100-r.raw);
+  var x=30+E/100*300, y=210-r.exp/100*200;
+  document.getElementById("qpt").style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px)";
+}
+Object.keys(rIn).forEach(function(k){rIn[k].addEventListener("input",calcRuse);});
+document.querySelectorAll("[data-dom]").forEach(function(b){b.addEventListener("click",function(){dom=b.getAttribute("data-dom");document.querySelectorAll("[data-dom]").forEach(function(x){x.setAttribute("aria-pressed",String(x===b));});calcRuse();});});
+document.querySelectorAll("[data-p]").forEach(function(b){b.addEventListener("click",function(){var v=b.getAttribute("data-p").split(",");rIn.R.value=v[0];rIn.U.value=v[1];rIn.S.value=v[2];rIn.E.value=v[3];rIn.N.value=v[4];calcRuse();});});
+calcRuse();
+
+/* ---------- Gantt ---------- */
+var G=[
+  ["Discovery & bake-off",[[1,2,"ink","Bake-off"]]],
+  ["UX, brand & 3D website",[[1,4,"alt","Identity & UX"],[11,13,"alt","3D website"]]],
+  ["AI orchestrator & chat",[[3,6,"","Guide core & chat"]]],
+  ["Knowledge base",[[3,6,"soft","Core corpus"],[7,10,"","Medical & wellness"]]],
+  ["Safety & crisis layer",[[4,10,"","Guards v1 → v2, crisis protocol"]]],
+  ["RUSE & discovery",[[4,6,"soft","Data capture"],[7,10,"","Scoring & ranking"]]],
+  ["Handoff & co-pilot",[[7,12,"alt","Handoff briefs, co-pilot"]]],
+  ["Memory, alerts & reports",[[11,13,"","Personalisation"]]],
+  ["Evaluation & QA",[[2,16,"soft","Golden set, red-team, regression, gate"]]],
+  ["Hardening & launch",[[14,16,"ink","Harden & launch"]]]
+];
+var gantt=document.getElementById("gantt"), gh="";
+for(var w=1;w<=16;w++){gh+='<div class="gh" style="grid-column:'+(w+1)+';grid-row:2">'+w+'</div>';}
+gh+='<div class="gh" style="grid-column:1;grid-row:2;text-align:left;padding-left:14px">Week</div>';
+G.forEach(function(row,ri){
+  gh+='<div class="lbl" style="grid-row:'+(ri+3)+'">'+row[0].replace(/&/g,"&amp;")+'</div><div class="lane" style="grid-row:'+(ri+3)+'">';
+  row[1].forEach(function(b){gh+='<div class="gbar grow '+b[2]+'" style="grid-column:'+b[0]+' / '+(b[1]+1)+'" title="'+b[3].replace(/&/g,"&amp;")+' · weeks '+b[0]+'–'+b[1]+'">'+b[3].replace(/&/g,"&amp;")+'</div>';});
+  gh+='</div>';
+});
+gh+='<div class="lbl" style="grid-row:'+(G.length+3)+';border-bottom:0">Milestones</div><div class="gms" style="grid-row:'+(G.length+3)+'">';
+[[2,"M0"],[6,"M1"],[10,"M2"],[13,"M3"],[16,"M4"]].forEach(function(m){gh+='<span style="grid-column:'+m[0]+'">'+m[1]+'</span>';});
+gh+='</div>';
+gantt.insertAdjacentHTML("beforeend",gh);
+
+/* ---------- Self-check for the RUSE calculator ---------- */
+var t1=ruse("medical",82,88,91,94,180);
+console.assert(Math.abs(t1.raw-90.1)<1e-9 && Math.abs(t1.adj-87.893)<0.01 && t1.tier==="Elite" && t1.quad==="North Stars","RUSE self-check failed",t1);
+console.assert(ruse("core",70,98,96,62,8).tier==="Rising","RUSE rising self-check failed");
+})();
+</script>
+
+</body>
+</html>

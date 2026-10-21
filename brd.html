@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Business requirements for AstroPlanet's AI astrology guide, medical and wellness domains, and RUSE-ranked astrologer marketplace.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2028%2028%22%3E%3Ccircle%20cx%3D%2214%22%20cy%3D%2214%22%20r%3D%2212.5%22%20fill%3D%22%23fff%22%20stroke%3D%22%231A1608%22%20stroke-width%3D%221.4%22/%3E%3Ccircle%20cx%3D%2214%22%20cy%3D%2214%22%20r%3D%225.5%22%20fill%3D%22%23FFC21A%22/%3E%3Ccircle%20cx%3D%2224.2%22%20cy%3D%229.6%22%20r%3D%222%22%20fill%3D%22%231A1608%22/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>AstroPlanet Business Requirements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a document column with a sticky contents rail. White paper; yellow is used only for marks, fills and highlights, never for running text. */
+:root{
+  --paper:#FFFFFF; --wash:#FFFAEB; --ink:#1A1608; --ink-2:#4A4535; --muted:#7A735F; --line:#EFE8D2; --line-2:#E2D9BC;
+  --sun:#FFC21A; --sun-deep:#F2A900; --sun-soft:#FFF1C2; --ochre:#8C6200;
+  --good:#2F7D4F; --good-soft:#E3F2E8; --warn:#9A5B00; --warn-soft:#FDEFD6; --bad:#B8402C; --bad-soft:#FBE6E1;
+  --f-display:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --f-body:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --header-h:60px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 24px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:rgba(255,255,255,.92)}
+a{color:var(--ochre);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+h1,h2,h3{text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,4.2vw,42px);line-height:1.08;letter-spacing:-.01em;margin:0}
+h3{font-size:18px;font-weight:700;margin:0;letter-spacing:-.005em}
+p{margin:0}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre)}
+.hl{font-style:italic;background:linear-gradient(transparent 60%,var(--sun-soft) 60%);padding:0 .08em}
+.lede{font-size:18.5px;line-height:1.6;color:var(--ink-2);max-width:66ch}
+.prose{max-width:68ch;color:var(--ink-2);display:grid;gap:14px}
+.prose strong{color:var(--ink)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+/* Header */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(255,255,255,.88);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;height:var(--header-h);display:flex;align-items:center;gap:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.brand svg{flex:none}
+.topbar .doc{color:var(--muted);font-size:14px;padding-left:14px;border-left:1px solid var(--line-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;padding:4px 10px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2);background:var(--paper);white-space:nowrap}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--sun)}
+.companion{font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;padding:7px 12px;border-radius:999px;background:var(--sun);white-space:nowrap;transition:background .2s,transform .2s}
+.companion:hover{background:var(--sun-deep);transform:translateY(-1px)}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--sun-deep)}
+@media (max-width:720px){.topbar .doc,.topbar .pill{display:none}}
+
+/* Shell */
+.shell{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:232px minmax(0,1fr);gap:64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+.rail{position:sticky;top:calc(var(--header-h) + 28px);align-self:start;max-height:calc(100vh - var(--header-h) - 48px);overflow:auto;padding-block:36px 24px}
+.rail ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:toc}
+.rail a{display:grid;grid-template-columns:28px 1fr;gap:4px;padding:6px 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:14px;line-height:1.35;transition:background .2s,color .2s}
+.rail a span{font-family:var(--f-mono);font-size:11.5px;padding-top:2px}
+.rail a:hover{color:var(--ink);background:var(--wash)}
+.rail a.active{color:var(--ink);background:var(--sun-soft)}
+.rail .rail-label{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 10px 12px}
+.toc-mobile{display:none}
+main{min-width:0}
+@media (max-width:1060px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail{display:none}
+  .toc-mobile{display:block;margin-top:28px;border:1px solid var(--line);border-radius:14px;background:var(--wash)}
+  .toc-mobile summary{cursor:pointer;padding:14px 16px;font-weight:600}
+  .toc-mobile ol{margin:0;padding:0 16px 16px 36px;display:grid;gap:6px;font-size:15px}
+}
+
+/* Sections */
+section.block{padding-block:72px 8px;display:grid;gap:28px;border-top:1px solid var(--line)}
+section.block:first-of-type{border-top:0}
+.sec-head{display:grid;gap:12px}
+.sec-num{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()){
+    .reveal{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 35%}
+    @keyframes rise{from{opacity:.3;transform:translateY(22px)}to{opacity:1;transform:none}}
+  }
+}
+
+/* Cover */
+.cover{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:40px;align-items:center;padding-block:56px 40px}
+.cover h1{font-family:var(--f-display);font-weight:400;font-size:clamp(44px,7vw,84px);line-height:.98;letter-spacing:-.02em;margin:14px 0 18px}
+.cover .lede{margin-bottom:26px}
+.wheel-wrap{position:relative;aspect-ratio:1;max-width:420px;width:100%;justify-self:center}
+.wheel{width:100%;height:100%;display:block}
+.wheel .r1{fill:none;stroke:var(--line-2);stroke-width:1}
+.wheel .r2{fill:none;stroke:var(--ink);stroke-width:1.2}
+.wheel .r3{fill:none;stroke:var(--line-2);stroke-width:1;stroke-dasharray:2 5}
+.wheel .spoke{stroke:var(--line-2);stroke-width:1}
+.wheel .lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;fill:var(--ink-2)}
+.wheel .sun{fill:var(--sun)}
+.wheel .sun-halo{fill:var(--sun-soft)}
+.wheel .orbit{fill:none;stroke:var(--ink);stroke-width:1;opacity:.35}
+.wheel .planet{fill:var(--ink)}
+.wheel .spin{transform-box:view-box;transform-origin:50% 50%}
+.wheel .orb{transform-box:view-box;transform-origin:50% 50%}
+@media (prefers-reduced-motion:no-preference){
+  .wheel .spin{animation:spin 160s linear infinite}
+  .wheel .orb.a{animation:spin 24s linear infinite}
+  .wheel .orb.b{animation:spin 40s linear infinite reverse}
+  .wheel .sun-halo{animation:breathe 6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{50%{transform:scale(1.08)}}
+.doc-control{width:100%;border-collapse:collapse;font-size:14px;max-width:560px}
+.doc-control th,.doc-control td{text-align:left;padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.doc-control th{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;width:150px;padding-right:16px}
+@media (max-width:820px){.cover{grid-template-columns:minmax(0,1fr)}.wheel-wrap{max-width:300px;order:-1}}
+
+/* Generic grids and cards */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.card{border:1px solid var(--line);border-radius:16px;padding:22px;background:var(--paper);display:grid;gap:10px;align-content:start;min-width:0;transition:border-color .25s,transform .25s,box-shadow .25s}
+.card:hover{border-color:var(--line-2);transform:translateY(-2px);box-shadow:0 14px 30px -22px rgba(90,70,0,.35)}
+.card p{color:var(--ink-2);font-size:15px}
+.card.wash{background:var(--wash);border-color:transparent}
+.icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--sun-soft);color:var(--ink)}
+.icon svg{width:22px;height:22px}
+
+.glance{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.glance > div{padding:20px;display:grid;gap:8px;align-content:start;border-right:1px solid var(--line);min-width:0}
+.glance > div:last-child{border-right:0}
+.glance b{font-family:var(--f-display);font-weight:400;font-size:24px;line-height:1.1}
+.glance p{font-size:14.5px;color:var(--ink-2)}
+@media (max-width:900px){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}.glance > div:nth-child(2){border-right:0}.glance > div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media (max-width:520px){.glance{grid-template-columns:minmax(0,1fr)}.glance > div{border-right:0;border-bottom:1px solid var(--line)}.glance > div:last-child{border-bottom:0}}
+
+/* Tables */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;-webkit-overflow-scrolling:touch}
+table.t{width:100%;border-collapse:collapse;font-size:14.5px;min-width:640px}
+table.t th{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:12px 14px;background:var(--wash);border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+table.t tr:last-child td{border-bottom:0}
+table.t td:first-child{color:var(--ink)}
+table.t .id{font-family:var(--f-mono);font-size:12.5px;color:var(--ochre);white-space:nowrap}
+table.t tbody tr{transition:background .15s}
+table.t tbody tr:hover{background:#FFFDF6}
+table.t .group td{background:var(--paper);font-weight:700;color:var(--ink);padding-top:18px;font-size:13.5px;letter-spacing:.02em}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.prio{display:inline-block;font-family:var(--f-mono);font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.prio.m{background:var(--sun);color:var(--ink)}
+.prio.s{background:var(--sun-soft);color:var(--ink)}
+.prio.c{background:var(--paper);color:var(--muted);border:1px solid var(--line-2)}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;padding:2px 7px;border-radius:6px;background:var(--wash);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
+.dotc{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--sun);border:1.5px solid var(--sun-deep)}
+.dotc.half{background:linear-gradient(90deg,var(--sun) 50%,transparent 50%)}
+.dotc.none{background:transparent;border-color:var(--line-2)}
+.cap td:not(:first-child):not(:last-child){text-align:center}
+.cap th:not(:first-child):not(:last-child){text-align:center}
+
+/* Personas */
+.persona{border:1px solid var(--line);border-radius:18px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;min-width:0;background:var(--paper);transition:transform .25s,box-shadow .25s}
+.persona:hover{transform:translateY(-3px);box-shadow:0 18px 36px -26px rgba(90,70,0,.4)}
+.persona .ph{display:flex;gap:14px;align-items:center;padding:20px 20px 16px;background:var(--wash)}
+.avatar{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:22px;background:var(--paper);box-shadow:inset 0 0 0 2px var(--sun),0 0 0 4px var(--paper),0 0 0 5px var(--line-2)}
+.persona .who b{display:block;font-size:16.5px}
+.persona .who span{font-size:13.5px;color:var(--muted)}
+.persona .pb{padding:16px 20px 20px;display:grid;gap:12px;align-content:start}
+.persona blockquote{margin:0;font-family:var(--f-display);font-size:20px;line-height:1.25;color:var(--ink)}
+.persona dl{margin:0;display:grid;gap:8px;font-size:14px}
+.persona dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ochre)}
+.persona dd{margin:0;color:var(--ink-2)}
+.persona .kind{margin-left:auto;align-self:flex-start}
+
+/* Body map */
+.bodymap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.bodymap div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:2px;min-width:0;background:var(--paper)}
+.bodymap b{font-size:13.5px}
+.bodymap span{font-size:12.5px;color:var(--muted)}
+.bodymap i{font-style:normal;font-family:var(--f-mono);font-size:10.5px;color:var(--ochre);letter-spacing:.06em}
+@media (max-width:900px){.bodymap{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:460px){.bodymap{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Will / will not */
+.bounds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.bounds > div{border-radius:16px;padding:22px;display:grid;gap:12px;align-content:start}
+.bounds .will{background:var(--good-soft)}
+.bounds .wont{background:var(--bad-soft)}
+.bounds ul{margin:0;padding:0;list-style:none;display:grid;gap:9px;font-size:15px;color:var(--ink-2)}
+.bounds li{display:grid;grid-template-columns:22px 1fr;gap:6px}
+.bounds li::before{font-weight:700}
+.bounds .will li::before{content:"✓";color:var(--good)}
+.bounds .wont li::before{content:"✕";color:var(--bad)}
+@media (max-width:700px){.bounds{grid-template-columns:minmax(0,1fr)}}
+
+/* RUSE */
+.ruse{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ruse .card{padding:20px;gap:12px}
+.ruse .letter{font-family:var(--f-display);font-size:64px;line-height:.8;color:var(--ink);position:relative;width:max-content}
+.ruse .letter::after{content:"";position:absolute;left:-4px;right:-6px;bottom:4px;height:16px;background:var(--sun);z-index:-1;border-radius:3px;transform:skewX(-8deg)}
+.ruse .letter{z-index:0;isolation:isolate}
+.ruse ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2);display:grid;gap:4px}
+.ruse .src{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line-2);padding-top:10px}
+@media (max-width:1000px){.ruse{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.ruse{grid-template-columns:minmax(0,1fr)}}
+
+.weights{display:grid;gap:14px}
+.wrow{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px;align-items:center}
+.wbar{display:flex;height:34px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.wbar span{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;transition:flex-grow .6s cubic-bezier(.2,.8,.2,1)}
+.wbar .R{background:#FFE58A}.wbar .U{background:#FFF1C2}.wbar .S{background:#FFD24D}.wbar .E{background:var(--sun-deep)}
+.wrow b{font-size:15px}
+.wrow small{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line-2)}
+@media (max-width:560px){.wrow{grid-template-columns:minmax(0,1fr);gap:6px}}
+
+.formula{font-family:var(--f-mono);font-size:14.5px;background:var(--ink);color:#FFF6D6;border-radius:14px;padding:18px 20px;overflow-x:auto;line-height:1.8;white-space:pre}
+.formula .k{color:var(--sun)}
+.formula .c{color:#B9AF92}
+
+.tiers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.tier{border-radius:14px;padding:16px;display:grid;gap:6px;align-content:start;border:1px solid var(--line);min-width:0}
+.tier b{font-size:15.5px}
+.tier .range{font-family:var(--f-mono);font-size:12.5px;color:var(--ochre)}
+.tier p{font-size:13.5px;color:var(--ink-2)}
+.tier.t1{background:var(--sun);border-color:var(--sun)}
+.tier.t1 .range{color:var(--ink)}
+.tier.t2{background:var(--sun-soft);border-color:var(--sun-soft)}
+.tier.t5{border-style:dashed}
+@media (max-width:1000px){.tiers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.tiers{grid-template-columns:minmax(0,1fr)}}
+
+.matrix-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
+.matrix{width:100%;max-width:520px;height:auto;display:block}
+.matrix .q{stroke:var(--line-2);stroke-width:1}
+.matrix .q1{fill:var(--sun)}.matrix .q2{fill:var(--sun-soft)}.matrix .q3{fill:var(--wash)}.matrix .q4{fill:var(--paper)}
+.matrix .ql{font-family:var(--f-body);font-weight:700;font-size:15px;fill:var(--ink)}
+.matrix .qs{font-family:var(--f-body);font-size:12px;fill:var(--ink-2)}
+.matrix .ax{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;fill:var(--muted)}
+.matrix .axl{stroke:var(--ink);stroke-width:1.2}
+@media (max-width:820px){.matrix-wrap{grid-template-columns:minmax(0,1fr)}}
+
+/* Flows */
+.flow{display:grid;gap:10px}
+.flow-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.flow-head .tag{background:var(--sun-soft);border-color:var(--sun-soft)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;counter-reset:st}
+.steps li{counter-increment:st;position:relative;flex:1 1 150px;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px;background:var(--paper);font-size:14px;color:var(--ink-2);display:grid;gap:4px;align-content:start}
+.steps li::before{content:counter(st,decimal-leading-zero);font-family:var(--f-mono);font-size:11px;color:var(--ochre)}
+.steps li b{color:var(--ink);font-size:14.5px}
+.steps li.actor-ai{background:var(--wash)}
+.steps li.actor-ast{background:var(--sun-soft);border-color:var(--sun-soft)}
+.steps li.actor-sys{border-style:dashed}
+.steps li.alert{background:var(--bad-soft);border-color:var(--bad-soft)}
+.actors{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink-2)}
+.actors i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line-2)}
+
+/* Timeline */
+.phases{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.phase{padding:18px;display:grid;gap:8px;align-content:start;border-right:1px solid var(--line);min-width:0;position:relative}
+.phase:last-child{border-right:0}
+.phase .wk{font-family:var(--f-mono);font-size:11.5px;color:var(--ochre)}
+.phase b{font-size:15.5px;line-height:1.3}
+.phase p{font-size:13.5px;color:var(--ink-2)}
+.phase .ms{margin-top:6px;font-size:12.5px;font-weight:600;color:var(--ink);display:flex;gap:6px;align-items:baseline}
+.phase .ms::before{content:"";width:9px;height:9px;background:var(--sun-deep);transform:rotate(45deg);flex:none;position:relative;top:1px}
+.phase-bar{height:6px;background:var(--line);position:relative}
+.phase-bar span{position:absolute;inset:0 auto 0 0;background:var(--sun)}
+@media (max-width:1000px){.phases{grid-template-columns:minmax(0,1fr)}.phase{border-right:0;border-bottom:1px solid var(--line)}.phase:last-child{border-bottom:0}}
+
+.callout{border-radius:16px;padding:20px 22px;background:var(--wash);display:grid;gap:8px;border:1px solid var(--line)}
+.callout.sun{background:var(--sun-soft);border-color:var(--sun-soft)}
+.callout b{font-size:15.5px}
+.callout p{font-size:15px;color:var(--ink-2)}
+
+footer.end{border-top:1px solid var(--line);padding-block:32px;margin-top:72px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;color:var(--muted);font-size:13.5px}
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top" aria-label="AstroPlanet, back to top">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5" fill="none" stroke="#1A1608" stroke-width="1.4"/><ellipse cx="14" cy="14" rx="12.5" ry="4.6" fill="none" stroke="#1A1608" stroke-width="1" transform="rotate(-24 14 14)" opacity=".5"/><circle cx="14" cy="14" r="5" fill="#FFC21A"/><circle cx="24.2" cy="9.6" r="1.8" fill="#1A1608"/></svg>
+      AstroPlanet
+    </a>
+    <span class="doc">Business Requirements Document</span>
+    <span class="spacer"></span>
+    <span class="pill"><span class="dot"></span>v1.0 · October 2026</span>
+    <a class="companion" id="companionLink" href="./">Implementation plan →</a>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<div class="shell" id="top">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-label">Contents</p>
+    <ol id="toc">
+      <li><a href="#summary"><span>01</span>Executive summary</a></li>
+      <li><a href="#objectives"><span>02</span>Business objectives</a></li>
+      <li><a href="#scope"><span>03</span>Scope &amp; constraints</a></li>
+      <li><a href="#personas"><span>04</span>User personas</a></li>
+      <li><a href="#domains"><span>05</span>Platform domains</a></li>
+      <li><a href="#chatbot"><span>06</span>AI guide capabilities</a></li>
+      <li><a href="#ruse"><span>07</span>Discovery &amp; RUSE ranking</a></li>
+      <li><a href="#functional"><span>08</span>Functional requirements</a></li>
+      <li><a href="#nfr"><span>09</span>Non-functional requirements</a></li>
+      <li><a href="#workflows"><span>10</span>Platform workflows</a></li>
+      <li><a href="#compliance"><span>11</span>Compliance &amp; safety</a></li>
+      <li><a href="#roadmap"><span>12</span>Release plan</a></li>
+      <li><a href="#risks"><span>13</span>Risks</a></li>
+      <li><a href="#glossary"><span>14</span>Glossary</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <!-- Cover -->
+    <div class="cover">
+      <div>
+        <p class="eyebrow">Business Requirements Document</p>
+        <h1>AstroPlanet, <span class="hl">guided</span> by AI and trusted astrologers</h1>
+        <p class="lede">Requirements for an AI-powered platform that brings core Vedic astrology, medical astrology and mental wellness into one personalised guide, and connects every seeker with the right specialist astrologer through the RUSE ranking system.</p>
+        <table class="doc-control">
+          <tr><th>Document</th><td>Business Requirements Document (BRD)</td></tr>
+          <tr><th>Version</th><td>1.0</td></tr>
+          <tr><th>Date</th><td>21 October 2026</td></tr>
+          <tr><th>Companion</th><td><a href="./">Technical Implementation Blueprint</a> (architecture, models, roadmap)</td></tr>        </table>
+      </div>
+      <div class="wheel-wrap" aria-hidden="true">
+        <svg class="wheel" viewBox="0 0 400 400">
+          <defs><path id="ringPath" d="M200,200 m-156,0 a156,156 0 1,1 312,0 a156,156 0 1,1 -312,0"/></defs>
+          <circle class="r1" cx="200" cy="200" r="190"/>
+          <circle class="r2" cx="200" cy="200" r="176"/>
+          <circle class="r1" cx="200" cy="200" r="138"/>
+          <circle class="r3" cx="200" cy="200" r="104"/>
+          <g class="spin" id="wheelSpin"></g>
+          <g class="orb a"><circle class="orbit" cx="200" cy="200" r="104"/><circle class="planet" cx="304" cy="200" r="5"/></g>
+          <g class="orb b"><circle class="planet" cx="200" cy="62" r="3.5"/></g>
+          <circle class="sun-halo" cx="200" cy="200" r="60"/>
+          <circle class="sun" cx="200" cy="200" r="38"/>
+        </svg>
+      </div>
+    </div>
+
+    <details class="toc-mobile">
+      <summary>Contents</summary>
+      <ol>
+        <li><a href="#summary">Executive summary</a></li>
+        <li><a href="#objectives">Business objectives</a></li>
+        <li><a href="#scope">Scope &amp; constraints</a></li>
+        <li><a href="#personas">User personas</a></li>
+        <li><a href="#domains">Platform domains</a></li>
+        <li><a href="#chatbot">AI guide capabilities</a></li>
+        <li><a href="#ruse">Discovery &amp; RUSE ranking</a></li>
+        <li><a href="#functional">Functional requirements</a></li>
+        <li><a href="#nfr">Non-functional requirements</a></li>
+        <li><a href="#workflows">Platform workflows</a></li>
+        <li><a href="#compliance">Compliance &amp; safety</a></li>
+        <li><a href="#roadmap">Release plan</a></li>
+        <li><a href="#risks">Risks</a></li>
+        <li><a href="#glossary">Glossary</a></li>
+      </ol>
+    </details>
+
+    <!-- 01 -->
+    <section class="block" id="summary">
+      <div class="sec-head reveal"><span class="sec-num">01</span><h2>Executive summary</h2></div>
+      <div class="prose reveal">
+        <p>AstroPlanet already offers kundali generation, horoscopes, Panchang, matchmaking, puja bookings and paid chat with astrologers. This program adds an <strong>AI guide</strong> that reads each user's actual birth chart and answers questions across three domains: <strong>core astrology</strong>, <strong>medical astrology</strong> and <strong>mental health and wellness</strong>.</p>
+        <p>When a question needs human depth, the guide hands the conversation to a <strong>specialist astrologer</strong>, chosen by the <strong>RUSE ranking system</strong>. RUSE scores every astrologer on Reliability, User feedback, Satisfaction and Expertise, weighted differently for each domain, so that people asking about health reach astrologers with proven medical-astrology depth and people in a difficult emotional period reach astrologers whose clients consistently leave feeling better.</p>
+        <p>Health and emotional wellbeing are sensitive subjects. Safety is therefore a product requirement, not an afterthought: the guide never diagnoses, never replaces a doctor or therapist, and switches to crisis support the moment someone may be at risk.</p>
+      </div>
+      <div class="glance reveal">
+        <div><span class="eyebrow">Three domains</span><b>One AI guide</b><p>Chart-grounded answers in English, Hindi and Hinglish, available around the clock.</p></div>
+        <div><span class="eyebrow">Human depth</span><b>Specialists on demand</b><p>One-tap handoff to a matched astrologer, with a consented brief so the user never repeats themselves.</p></div>
+        <div><span class="eyebrow">Quality engine</span><b>RUSE ranking</b><p>Rewards astrologers who are reliable, well reviewed, genuinely helpful and verifiably expert.</p></div>
+        <div><span class="eyebrow">By design</span><b>Safe and private</b><p>Medical and crisis guardrails, DPDP-aligned consent, and no training on user data without opt-in.</p></div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="block" id="objectives">
+      <div class="sec-head reveal"><span class="sec-num">02</span><h2>Business objectives &amp; success metrics</h2>
+        <p class="lede">Targets apply 12 months after public launch. Baselines for existing journeys are captured in Phase 0 so every target has a starting point.</p></div>
+      <div class="table-wrap reveal">
+        <table class="t">
+          <thead><tr><th>#</th><th>Objective</th><th>Key metric</th><th>Target</th></tr></thead>
+          <tbody>
+            <tr><td class="id">O1</td><td>Make personalised astrological guidance available 24/7</td><td>AI chat satisfaction (CSAT)<br>Conversations resolved without escalation</td><td class="num">≥ 4.3 / 5<br>≥ 70%</td></tr>
+            <tr><td class="id">O2</td><td>Grow consultation revenue through qualified handoffs</td><td>AI conversation → paid consultation conversion<br>Consultation revenue growth</td><td class="num">≥ 8%<br>+30% YoY</td></tr>
+            <tr><td class="id">O3</td><td>Raise consultation quality and trust</td><td>Average rating of recommended astrologers<br>Complaint rate</td><td class="num">≥ 4.5 / 5<br>&lt; 1.5% of sessions</td></tr>
+            <tr><td class="id">O4</td><td>Build long-term retention</td><td>60-day repeat consultation rate<br>Month-3 user retention</td><td class="num">≥ 35%<br>≥ 25%</td></tr>
+            <tr><td class="id">O5</td><td>Lead the market on safety in health and wellness astrology</td><td>Unsafe advice reaching a user<br>Crisis detection recall</td><td class="num">&lt; 0.1% of conversations<br>≥ 98%</td></tr>
+            <tr><td class="id">O6</td><td>Grow and keep a high-quality astrologer network</td><td>Share of active astrologers in Elite or Trusted tiers<br>Monthly astrologer churn</td><td class="num">≥ 60%<br>&lt; 4%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="block" id="scope">
+      <div class="sec-head reveal"><span class="sec-num">03</span><h2>Scope, assumptions &amp; constraints</h2></div>
+      <div class="grid g2 reveal">
+        <div class="card">
+          <span class="eyebrow">In scope · Release 1 (public launch, week 16)</span>
+          <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2)">
+            <li>AI guide across core, medical and wellness astrology on web and mobile web (PWA)</li>
+            <li>English and Hindi, with Hinglish understood and answered naturally</li>
+            <li>Birth chart, divisional charts, dasha and transit computation through the existing kundali service</li>
+            <li>Astrologer discovery, RUSE scoring, tiers and personalised recommendations</li>
+            <li>AI-to-astrologer handoff with a consented context brief</li>
+            <li>Chat and voice consultations with wallet billing (existing flows, extended)</li>
+            <li>Feedback capture, astrologer onboarding and domain certification</li>
+            <li>Trust &amp; Quality console and AI safety review queue</li>
+            <li>Website refresh in the white-and-yellow identity with 3D and motion</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="eyebrow">Out of scope · or later releases</span>
+          <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2)">
+            <li>Medical diagnosis, treatment, prescriptions or telemedicine</li>
+            <li>Therapy or counselling services; the platform signposts licensed help only</li>
+            <li>Video consultations (Release 2)</li>
+            <li>Native iOS and Android apps (Release 2; the PWA covers mobile at launch)</li>
+            <li>Tamil, Telugu, Bengali and Marathi (Release 2)</li>
+            <li>Western tropical astrology mode (Release 2 option)</li>
+            <li>Gemstone or remedy e-commerce</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid g3 reveal">
+        <div class="card wash"><span class="eyebrow">Assumptions</span><p>The existing Next.js and NestJS platform remains the base. DivineAPI continues to supply chart calculations. Azure remains the cloud. A domain advisory panel is in place by week 2.</p></div>
+        <div class="card wash"><span class="eyebrow">Constraints</span><p>Digital Personal Data Protection Act, 2023 and its Rules. Drugs and Magic Remedies (Objectionable Advertisements) Act, 1954. Consumer Protection (E-Commerce) Rules, 2020. A 16-week delivery window.</p></div>
+        <div class="card wash"><span class="eyebrow">Dependencies</span><p>Access to Claude models through Microsoft Foundry on the client's Azure subscription. DivineAPI availability. Razorpay. Advisory panel time for content review and evaluation.</p></div>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="block" id="personas">
+      <div class="sec-head reveal"><span class="sec-num">04</span><h2>User personas</h2>
+        <p class="lede">Three seekers, one astrologer and one internal operator. Each persona drives specific requirements, referenced by ID in section 8.</p></div>
+      <div class="grid g3 reveal">
+        <article class="persona">
+          <div class="ph"><div class="avatar">P</div><div class="who"><b>Priya Raman, 29</b><span>Product manager · Bengaluru</span></div><span class="tag kind">Seeker</span></div>
+          <div class="pb">
+            <blockquote>“I want a clear answer before I accept the Berlin offer.”</blockquote>
+            <dl>
+              <div><dt>Goals</dt><dd>Career and relationship timing, private and fast, on her phone in the evening.</dd></div>
+              <div><dt>Frustrations</dt><dd>Generic sun-sign horoscopes and pushy upselling.</dd></div>
+              <div><dt>Success</dt><dd>A chart-specific answer in two minutes, then a career specialist if she wants depth. <span class="mono small muted">FR-10, 11, 18, 24</span></dd></div>
+            </dl>
+          </div>
+        </article>
+        <article class="persona">
+          <div class="ph"><div class="avatar">R</div><div class="who"><b>Rajesh Verma, 52</b><span>Textile trader · Lucknow</span></div><span class="tag kind">Seeker</span></div>
+          <div class="pb">
+            <blockquote>“My health has been off since last year. Is it my planets?”</blockquote>
+            <dl>
+              <div><dt>Goals</dt><dd>Understand a difficult period and find remedies, in Hindi, with respect for tradition.</dd></div>
+              <div><dt>Risk to manage</dt><dd>Lives with type-2 diabetes and could delay medical care if told a remedy will fix it.</dd></div>
+              <div><dt>Success</dt><dd>Safe, non-invasive remedies, clear advice to keep seeing his doctor, and a medical-astrology specialist. <span class="mono small muted">FR-14, 18, 39</span></dd></div>
+            </dl>
+          </div>
+        </article>
+        <article class="persona">
+          <div class="ph"><div class="avatar">A</div><div class="who"><b>Ananya Kulkarni, 23</b><span>Postgraduate student · Pune</span></div><span class="tag kind">Seeker</span></div>
+          <div class="pb">
+            <blockquote>“Exams and a breakup in the same month. I just need to make sense of it.”</blockquote>
+            <dl>
+              <div><dt>Goals</dt><dd>Use astrology for self-reflection, calm down, sleep better.</dd></div>
+              <div><dt>Risk to manage</dt><dd>Acute distress at night. The guide must recognise crisis language and respond with real help.</dd></div>
+              <div><dt>Success</dt><dd>Supportive check-ins, journaling prompts and breathing practices, with helplines when needed. <span class="mono small muted">FR-15, 16, 17</span></dd></div>
+            </dl>
+          </div>
+        </article>
+        <article class="persona">
+          <div class="ph"><div class="avatar">M</div><div class="who"><b>Meera Iyer, 44</b><span>Vedic astrologer, 16 years · Chennai</span></div><span class="tag kind">Astrologer</span></div>
+          <div class="pb">
+            <blockquote>“Rank me on how well I help people, not on how cheap I am.”</blockquote>
+            <dl>
+              <div><dt>Goals</dt><dd>Serious clients who match her medical-astrology specialty, and less time on chart preparation.</dd></div>
+              <div><dt>Frustrations</dt><dd>Rankings driven by price and volume; fake reviews lifting competitors.</dd></div>
+              <div><dt>Success</dt><dd>A fair, explainable RUSE score and an AI-prepared brief before every session. <span class="mono small muted">FR-19, 28, 41</span></dd></div>
+            </dl>
+          </div>
+        </article>
+        <article class="persona">
+          <div class="ph"><div class="avatar">S</div><div class="who"><b>Sana Qureshi, 35</b><span>Trust &amp; Quality manager</span></div><span class="tag kind">Operator</span></div>
+          <div class="pb">
+            <blockquote>“I need to see a problem astrologer before the complaints pile up.”</blockquote>
+            <dl>
+              <div><dt>Goals</dt><dd>Spot quality and safety issues early and act with evidence.</dd></div>
+              <div><dt>Needs</dt><dd>RUSE dashboards, the quadrant matrix, flagged sessions, an audit trail for every override.</dd></div>
+              <div><dt>Success</dt><dd>Complaint rate under 1.5% and every safety event reviewed within 24 hours. <span class="mono small muted">FR-29, 42, 43</span></dd></div>
+            </dl>
+          </div>
+        </article>
+        <div class="card wash" style="align-content:center">
+          <span class="eyebrow">Persona coverage</span>
+          <p>Priya covers core astrology and conversion. Rajesh covers medical astrology, Hindi and safety. Ananya covers wellness and crisis handling. Meera covers the supply side and ranking fairness. Sana covers trust and quality operations.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section class="block" id="domains">
+      <div class="sec-head reveal"><span class="sec-num">05</span><h2>Platform domains</h2>
+        <p class="lede">All three domains share one birth chart, one conversation and one astrologer marketplace. Each has its own knowledge base, safety policy and RUSE weighting.</p></div>
+      <div class="grid g3 reveal">
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(-25 12 12)"/><circle cx="20.3" cy="8" r="1.1" fill="currentColor"/></svg></div>
+          <h3>Core astrology</h3>
+          <p>Birth chart (D1) with Navamsa (D9) and Dashamsa (D10), Vimshottari dasha timelines, transits (gochar), yogas and doshas explained without fear, Ashtakoot compatibility, muhurta, horoscopes and Panchang.</p>
+          <p class="small muted">“When does my Jupiter period start, and what does it mean for my career?”</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div>
+          <h3>Medical astrology</h3>
+          <p>Kalapurusha body mapping, 6th, 8th and 12th house analysis, planetary significations for vitality, and periods of health sensitivity by dasha and transit. Always presented alongside, never instead of, medical care.</p>
+          <p class="small muted">“Which areas of health does my chart ask me to look after?”</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></div>
+          <h3>Mental health &amp; wellness</h3>
+          <p>Moon and mind analysis, emotional patterns, demanding transits such as Sade Sati framed for reflection, mood check-ins, journaling, guided breathing and sleep routines, with crisis signposting built in.</p>
+          <p class="small muted">“Sade Sati started and I feel low all the time. How do I get through it?”</p>
+        </div>
+      </div>
+      <div class="reveal" style="display:grid;gap:12px">
+        <h3>Classical correspondences the medical domain may reference</h3>
+        <p class="small muted" style="max-width:70ch">The Kalapurusha maps each sign to a region of the body. The AI uses these as traditional context for wellbeing conversations, reviewed by the medical-astrology advisor, and never as a diagnosis.</p>
+        <div class="bodymap">
+          <div><i>01 MEṢA</i><b>Aries</b><span>Head, brain</span></div>
+          <div><i>02 VṚṢABHA</i><b>Taurus</b><span>Face, throat</span></div>
+          <div><i>03 MITHUNA</i><b>Gemini</b><span>Shoulders, arms, lungs</span></div>
+          <div><i>04 KARKA</i><b>Cancer</b><span>Chest, stomach</span></div>
+          <div><i>05 SIṂHA</i><b>Leo</b><span>Heart, upper back</span></div>
+          <div><i>06 KANYĀ</i><b>Virgo</b><span>Digestion, intestines</span></div>
+          <div><i>07 TULĀ</i><b>Libra</b><span>Kidneys, lower back</span></div>
+          <div><i>08 VṚŚCIKA</i><b>Scorpio</b><span>Reproductive system</span></div>
+          <div><i>09 DHANU</i><b>Sagittarius</b><span>Hips, thighs</span></div>
+          <div><i>10 MAKARA</i><b>Capricorn</b><span>Knees, joints</span></div>
+          <div><i>11 KUMBHA</i><b>Aquarius</b><span>Calves, circulation</span></div>
+          <div><i>12 MĪNA</i><b>Pisces</b><span>Feet, sleep</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="block" id="chatbot">
+      <div class="sec-head reveal"><span class="sec-num">06</span><h2>AI guide capabilities</h2>
+        <p class="lede">Working name for the guide: <strong>Jyoti</strong>. It reasons over the user's computed chart, cites its sources and always offers one clear next step.</p></div>
+      <div class="table-wrap reveal">
+        <table class="t cap">
+          <thead><tr><th>Capability</th><th>Core</th><th>Medical</th><th>Wellness</th><th>Release</th></tr></thead>
+          <tbody>
+            <tr><td>Chart-grounded questions and answers</td><td><span class="dotc" title="Full"></span></td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Dasha and transit timelines with plain-language meaning</td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Compatibility analysis (Ashtakoot, Manglik check)</td><td><span class="dotc"></span></td><td><span class="dotc none" title="Not applicable"></span></td><td><span class="dotc none"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Body-region and vitality mapping</td><td><span class="dotc none"></span></td><td><span class="dotc"></span></td><td><span class="dotc none"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Mood check-ins and journaling prompts</td><td><span class="dotc none"></span></td><td><span class="dotc none"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Guided breathing, meditation and sleep practices</td><td><span class="dotc none"></span></td><td><span class="dotc half" title="Partial"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Personalised daily insight and opt-in transit alerts</td><td><span class="dotc"></span></td><td><span class="dotc half"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Deep written reports (career, health-wellness, relationships, year ahead)</td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Handoff to a matched specialist with a context brief</td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Opt-in memory of goals and past conversations</td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="tag">R1</span></td></tr>
+            <tr><td>Voice conversation with the guide</td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="dotc"></span></td><td><span class="tag">R2</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend reveal"><span><i style="background:var(--sun)"></i>Full capability</span><span><i style="background:linear-gradient(90deg,var(--sun) 50%,#fff 50%)"></i>Partial, within domain policy</span><span><i style="background:#fff"></i>Not applicable</span></div>
+
+      <div class="grid g2 reveal">
+        <div class="card">
+          <h3>How the guide behaves</h3>
+          <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2)">
+            <li>Asks for missing birth details and records how certain the birth time is; flags answers that depend on an uncertain time.</li>
+            <li>Explains the reasoning: which planet, house, sign and period lead to the interpretation.</li>
+            <li>Shows the classical or advisor-approved source behind interpretive claims.</li>
+            <li>Speaks warmly and without fatalism. Difficult placements are described as tendencies to work with.</li>
+            <li>Ends with one useful next step: a practice, a question to reflect on, a report or a specialist.</li>
+            <li>Identifies itself as an AI at the start of every conversation.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>When the guide suggests a human astrologer</h3>
+          <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2)">
+            <li>The user asks for one.</li>
+            <li>The question spans several charts, for example a family or a business partnership.</li>
+            <li>The guide's confidence is low or the birth time is uncertain and rectification is needed.</li>
+            <li>The user wants rituals or puja, which the existing puja booking flow fulfils.</li>
+            <li>A medical-astrology question goes beyond general wellbeing context.</li>
+            <li>Emotional intensity is high but not a crisis. A crisis goes to helplines, never to an astrologer.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="bounds reveal">
+        <div class="will">
+          <h3>The guide will</h3>
+          <ul>
+            <li>Frame insights as astrological perspectives for reflection</li>
+            <li>Encourage users to see a doctor or a mental health professional when symptoms or distress come up</li>
+            <li>Suggest only non-invasive remedies: mantra, meditation, charity, routine and lifestyle</li>
+            <li>Show Tele-MANAS (14416) and emergency (112) immediately when someone may be at risk</li>
+            <li>Let users view, export and delete their conversations</li>
+          </ul>
+        </div>
+        <div class="wont">
+          <h3>The guide will not</h3>
+          <ul>
+            <li>Diagnose or name a disease, or interpret test results</li>
+            <li>Advise starting, changing or stopping any medicine or treatment</li>
+            <li>Predict death, lifespan, dates of accidents or the sex of an unborn child</li>
+            <li>Guarantee outcomes or present gemstones and remedies as cures</li>
+            <li>Use fear about doshas or transits to sell paid services</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section class="block" id="ruse">
+      <div class="sec-head reveal"><span class="sec-num">07</span><h2>Astrologer discovery &amp; RUSE ranking</h2>
+        <p class="lede">RUSE turns performance data, user feedback, satisfaction and verified expertise into one explainable score per astrologer per domain. It decides who is recommended, in what order, and who needs coaching.</p></div>
+
+      <div class="grid g4 reveal">
+        <div class="card wash"><h3>Search &amp; filters</h3><p>Domain, specialty, language, price per minute, rating, experience, available now.</p></div>
+        <div class="card wash"><h3>Rich profiles</h3><p>Verified credentials, RUSE tier badge, specialties, reviews, transparent per-minute price.</p></div>
+        <div class="card wash"><h3>Recommended for you</h3><p>Ranked by RUSE, fit with the question and availability, refreshed as the user's needs change.</p></div>
+        <div class="card wash"><h3>In-chat handoff</h3><p>Three matched specialists appear inside the AI conversation when escalation rules trigger.</p></div>
+      </div>
+
+      <div class="ruse reveal">
+        <div class="card">
+          <div class="letter">R</div><h3>Reliability</h3>
+          <p class="small">Performance metrics</p>
+          <ul><li>On-time session starts</li><li>Median time to accept a chat request</li><li>Session completion rate</li><li>Repeat bookings within 60 days</li><li>Cancellations, no-shows, disputes (inverse)</li></ul>
+          <p class="src">Source: session and booking logs</p>
+        </div>
+        <div class="card">
+          <div class="letter">U</div><h3>User feedback</h3>
+          <p class="small">What users say</p>
+          <ul><li>Star rating, adjusted for review count</li><li>Review sentiment</li><li>Complaint rate by category (inverse)</li><li>Share of reviews from verified sessions</li></ul>
+          <p class="src">Source: ratings, reviews, complaints</p>
+        </div>
+        <div class="card">
+          <div class="letter">S</div><h3>Satisfaction</h3>
+          <p class="small">Whether people were helped</p>
+          <ul><li>Post-session CSAT: “Did this help?”</li><li>Would consult this astrologer again</li><li>30-day follow-up: “Did the guidance prove useful?”</li><li>User retention after the session</li></ul>
+          <p class="src">Source: in-app surveys and retention</p>
+        </div>
+        <div class="card">
+          <div class="letter">E</div><h3>Expertise</h3>
+          <p class="small">Verified depth in the domain</p>
+          <ul><li>Verified credentials and years of practice</li><li>Platform domain certification score</li><li>Quarterly peer review of consented sessions</li><li>Specialisation depth in the domain</li><li>Chart-accuracy audit</li></ul>
+          <p class="src">Source: onboarding, assessments, panel audits</p>
+        </div>
+      </div>
+
+      <div class="reveal" style="display:grid;gap:16px">
+        <h3>Domain weights</h3>
+        <p class="small muted" style="max-width:70ch">Health questions put the most weight on verified expertise. Wellness questions put the most weight on whether people actually felt helped.</p>
+        <div class="weights">
+          <div class="wrow"><b>Core astrology<small>balanced</small></b><div class="wbar"><span class="R" style="flex:25">R 25%</span><span class="U" style="flex:25">U 25%</span><span class="S" style="flex:25">S 25%</span><span class="E" style="flex:25">E 25%</span></div></div>
+          <div class="wrow"><b>Medical astrology<small>expertise first</small></b><div class="wbar"><span class="R" style="flex:20">R 20%</span><span class="U" style="flex:15">U 15%</span><span class="S" style="flex:20">S 20%</span><span class="E" style="flex:45">E 45%</span></div></div>
+          <div class="wrow"><b>Mental wellness<small>satisfaction first</small></b><div class="wbar"><span class="R" style="flex:20">R 20%</span><span class="U" style="flex:20">U 20%</span><span class="S" style="flex:35">S 35%</span><span class="E" style="flex:25">E 25%</span></div></div>
+        </div>
+      </div>
+
+      <div class="reveal" style="display:grid;gap:12px">
+        <h3>Scoring rules</h3>
+<div class="formula"><span class="c"># every sub-metric is normalised to 0–100 within its domain cohort</span>
+<span class="k">RUSE</span>(d)      = w<sub>R</sub>(d)·R + w<sub>U</sub>(d)·U + w<sub>S</sub>(d)·S + w<sub>E</sub>(d)·E
+<span class="k">RUSE_adj</span>(d)  = ( n·RUSE(d) + k·μ(d) ) / ( n + k )      <span class="c"># k = 25 sessions, μ = cohort mean</span>
+<span class="k">Rank</span>         = 0.55·RUSE_adj + 0.30·Match + 0.15·Availability</div>
+        <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:6px;color:var(--ink-2);max-width:74ch">
+          <li><strong>Confidence adjustment.</strong> An astrologer with few sessions is pulled toward the cohort average, so one perfect review cannot put a newcomer above someone with 400 strong sessions.</li>
+          <li><strong>Recency.</strong> Session-level metrics decay with a 90-day half-life; recent work counts most.</li>
+          <li><strong>Match</strong> covers specialty fit to the question, language, price band and the user's past preferences. <strong>Availability</strong> favours astrologers online now or free within 30 minutes.</li>
+          <li><strong>Exploration.</strong> Two of the top ten recommendation slots go to Rising astrologers with an adjusted score of at least 60.</li>
+          <li><strong>Load balance.</strong> No astrologer receives more than 15% of recommendation impressions for a topic in any hour.</li>
+          <li><strong>Hard gates.</strong> Incomplete verification, an open serious complaint, or a medical-cure or fear-selling violation removes an astrologer from recommendations pending review.</li>
+          <li><strong>Cadence.</strong> Scores recompute nightly; complaints and hard gates apply immediately.</li>
+        </ul>
+      </div>
+
+      <div class="reveal" style="display:grid;gap:12px">
+        <h3>Tiers and visibility</h3>
+        <div class="tiers">
+          <div class="tier t1"><b>Elite</b><span class="range">RUSE ≥ 85</span><p>Top placement, Elite badge, eligible for advisory panel and AI training-data review.</p></div>
+          <div class="tier t2"><b>Trusted</b><span class="range">70 – 84.9</span><p>Full visibility in recommendations and search.</p></div>
+          <div class="tier"><b>Developing</b><span class="range">55 – 69.9</span><p>Shown in search; recommended when match is strong. Improvement tips each week.</p></div>
+          <div class="tier"><b>Under review</b><span class="range">&lt; 55</span><p>Reduced visibility and a coaching plan. Review after 30 days, never silent removal.</p></div>
+          <div class="tier t5"><b>Rising</b><span class="range">&lt; 25 sessions</span><p>New and verified. Protected exploration slots until enough data exists.</p></div>
+        </div>
+      </div>
+
+      <div class="matrix-wrap reveal">
+        <svg class="matrix" viewBox="0 0 520 440" role="img" aria-label="RUSE Matrix: expertise on the horizontal axis, experience (user feedback and satisfaction) on the vertical axis, giving four quadrants">
+          <rect class="q q2" x="60" y="20" width="220" height="180"/>
+          <rect class="q q1" x="280" y="20" width="220" height="180"/>
+          <rect class="q q4" x="60" y="200" width="220" height="180"/>
+          <rect class="q q3" x="280" y="200" width="220" height="180"/>
+          <text class="ql" x="76" y="50">Favourites to certify</text><text class="qs" x="76" y="70">Loved by users, expertise unproven.</text><text class="qs" x="76" y="88">Action: domain certification.</text>
+          <text class="ql" x="296" y="50">North Stars</text><text class="qs" x="296" y="70">Expert and consistently helpful.</text><text class="qs" x="296" y="88">Action: feature, mentor others.</text>
+          <text class="ql" x="76" y="230">Support plan</text><text class="qs" x="76" y="250">Low on both axes.</text><text class="qs" x="76" y="268">Action: coaching, review in 30 days.</text>
+          <text class="ql" x="296" y="230">Specialists to coach</text><text class="qs" x="296" y="250">Deep knowledge, weaker experience.</text><text class="qs" x="296" y="268">Action: communication coaching.</text>
+          <line class="axl" x1="60" y1="380" x2="506" y2="380"/><line class="axl" x1="60" y1="380" x2="60" y2="14"/>
+          <text class="ax" x="500" y="402" text-anchor="end">EXPERTISE (E) →</text>
+          <text class="ax" x="40" y="380" transform="rotate(-90 40 380)">EXPERIENCE (U + S) / 2 →</text>
+          <text class="ax" x="280" y="402" text-anchor="middle">70</text>
+          <text class="ax" x="52" y="204" text-anchor="end">70</text>
+        </svg>
+        <div class="prose">
+          <h3 style="color:var(--ink)">The RUSE Matrix</h3>
+          <p>Plotting each astrologer by Expertise against the average of User feedback and Satisfaction gives the Trust &amp; Quality team a single picture of the network. The threshold for both axes is 70.</p>
+          <p>The matrix turns the score into action. North Stars are featured and invited to mentor. Specialists with deep knowledge but weaker client experience get communication coaching. Popular astrologers without proven depth are asked to certify before they appear in medical or wellness recommendations.</p>
+          <p><strong>Integrity.</strong> Only sessions of five minutes or more can be reviewed. Review bursts and rating rings are detected automatically. Rankings cannot be bought; any future sponsored placement is labelled and never changes a RUSE score. Astrologers see their own dimension scores and can appeal.</p>
+        </div>
+      </div>    </section>
+
+    <!-- 09 -->
+    <section class="block" id="functional">
+      <div class="sec-head reveal"><span class="sec-num">08</span><h2>Functional requirements</h2>
+        <p class="lede">Priority uses MoSCoW: <span class="prio m">Must</span> <span class="prio s">Should</span> <span class="prio c">Could</span>. Existing platform features that are extended rather than rebuilt are marked “existing”.</p></div>
+      <div class="table-wrap reveal">
+        <table class="t">
+          <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr class="group"><td colspan="3">Accounts &amp; profiles</td></tr>
+            <tr><td class="id">FR-01</td><td>Sign up and sign in with mobile OTP (existing) and email. Accounts are for users aged 18 and over.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-02</td><td>Store several birth profiles per account (self, partner, family) with the account holder's confirmation of consent.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-03</td><td>Capture birth date, time and place with geocoded coordinates and historical time-zone resolution; record birth-time confidence as exact, approximate or unknown.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-04</td><td>Privacy centre: view, download, correct and delete personal data and AI conversation history.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-05</td><td>Separate opt-in consent for health and wellness conversations and for AI memory.</td><td><span class="prio m">Must</span></td></tr>
+            <tr class="group"><td colspan="3">Charts &amp; astrology engine</td></tr>
+            <tr><td class="id">FR-06</td><td>Generate D1, D9 and D10 charts and the Vimshottari dasha timeline through the existing kundali service; cache per birth profile.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-07</td><td>Compute current and upcoming transits relative to the natal chart.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-08</td><td>Identify yogas and doshas with neutral, non-fear-based explanations.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-09</td><td>Compatibility (Ashtakoot Guna Milan) through the existing matchmaking service.</td><td><span class="prio m">Must</span></td></tr>
+            <tr class="group"><td colspan="3">AI guide</td></tr>
+            <tr><td class="id">FR-10</td><td>Conversational chat with streamed responses in English, Hindi and Hinglish.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-11</td><td>Ground every chart statement in computed chart data; the guide never invents placements, dates or periods.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-12</td><td>Classify each message into core, medical and/or wellness and apply that domain's knowledge and policy.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-13</td><td>Show sources for interpretive claims in an expandable “Why this answer” panel.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-14</td><td>Medical safety: no diagnosis, medication or treatment advice; show doctor-consultation guidance whenever symptoms are mentioned.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-15</td><td>Crisis protocol: detect self-harm or acute distress, pause astrology content, show Tele-MANAS (14416) and emergency 112, follow up, and log for review.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-16</td><td>Mood check-ins, journaling prompts and guided breathing and sleep practices in wellness conversations.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-17</td><td>Opt-in conversation memory of goals and past topics; users can view and clear it.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-18</td><td>Suggest three matched specialists when escalation rules trigger, with one-tap handoff.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-19</td><td>Create a handoff brief (question, chart highlights, AI summary) shared with the astrologer only after user consent.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-20</td><td>Thumbs up or down with an optional reason on every AI answer.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-21</td><td>Personalised daily insight and opt-in proactive transit alerts.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-22</td><td>Deep written reports (career, health-wellness, relationships, year ahead) as downloadable PDFs.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-23</td><td>AI usage plans: free daily quota plus paid packs or subscription, charged through the wallet.</td><td><span class="prio m">Must</span></td></tr>
+            <tr class="group"><td colspan="3">Discovery &amp; ranking</td></tr>
+            <tr><td class="id">FR-24</td><td>Astrologer search with filters for domain, specialty, language, price per minute, rating, experience and availability now.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-25</td><td>Astrologer profile with verified credentials, RUSE tier badge, specialties, reviews and price.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-26</td><td>Nightly RUSE computation per astrologer per domain, with immediate application of hard gates.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-27</td><td>Recommendation ranking that blends RUSE, match and availability, with exploration slots and impression caps.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-28</td><td>Astrologer RUSE dashboard: dimension scores, 90-day trend and improvement tips.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-29</td><td>Admin override and appeal workflow for rankings, with a full audit trail.</td><td><span class="prio m">Must</span></td></tr>
+            <tr class="group"><td colspan="3">Consultations &amp; payments</td></tr>
+            <tr><td class="id">FR-30</td><td>Chat and voice consultations with per-minute wallet billing (existing).</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-31</td><td>Wallet top-up through Razorpay (existing); per-minute price shown before every session.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-32</td><td>Scheduled bookings with reminders.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-33</td><td>Low-balance warning, graceful session end, and automatic refunds for technical failures.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-34</td><td>Video consultations.</td><td><span class="prio c">Could · R2</span></td></tr>
+            <tr class="group"><td colspan="3">Feedback &amp; quality</td></tr>
+            <tr><td class="id">FR-35</td><td>Post-session rating, CSAT question and optional review, accepted only from verified sessions of five minutes or more.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-36</td><td>30-day follow-up pulse: “Did the guidance prove useful?”</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-37</td><td>Complaint reporting with categories: rudeness, fear-selling, medical claims, overcharging, other.</td><td><span class="prio m">Must</span></td></tr>
+            <tr class="group"><td colspan="3">Astrologer onboarding &amp; tools</td></tr>
+            <tr><td class="id">FR-38</td><td>Application with KYC, credentials and specialties (existing registration, extended).</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-39</td><td>Domain certification assessments for core, medical and wellness, scored by the advisory panel.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-40</td><td>Code-of-conduct acceptance, including medical and wellness boundaries and the no-fear-selling rule.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-41</td><td>Astrologer co-pilot: AI pre-session brief and chart summary.</td><td><span class="prio s">Should</span></td></tr>
+            <tr class="group"><td colspan="3">Admin, trust &amp; content</td></tr>
+            <tr><td class="id">FR-42</td><td>Trust console: RUSE leaderboard, RUSE Matrix, flagged sessions and complaints queue.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-43</td><td>AI safety review queue: crisis events, flagged answers and user reports, with 24-hour review targets.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-44</td><td>Knowledge base management: upload, review, approve and version the content the AI uses.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-45</td><td>Analytics for the AI-to-consultation funnel, revenue and retention.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-46</td><td>Versioned prompt and model configuration with rollback, visible to admins.</td><td><span class="prio s">Should</span></td></tr>
+            <tr><td class="id">FR-47</td><td>Existing horoscope, Panchang, kundali, matchmaking and puja pages retained and restyled.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-48</td><td>White-and-yellow identity across the website with a 3D hero and motion that respects reduced-motion settings.</td><td><span class="prio m">Must</span></td></tr>
+            <tr><td class="id">FR-49</td><td>Notifications by PWA push, SMS and email; WhatsApp in Release 2.</td><td><span class="prio s">Should</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="block" id="nfr">
+      <div class="sec-head reveal"><span class="sec-num">09</span><h2>Non-functional requirements</h2></div>
+      <div class="table-wrap reveal">
+        <table class="t">
+          <thead><tr><th>Category</th><th>Requirement</th><th>Measure</th></tr></thead>
+          <tbody>
+            <tr><td>Performance</td><td>AI responses start quickly and finish within a conversational pace; pages load fast on 4G.</td><td class="num">First token p95 ≤ 2.0 s<br>Full answer p95 ≤ 8 s<br>LCP ≤ 2.5 s · API p95 ≤ 300 ms</td></tr>
+            <tr><td>Availability</td><td>Core services stay up; the AI degrades to a fallback model rather than failing.</td><td class="num">99.9% monthly</td></tr>
+            <tr><td>Scalability</td><td>Handle festival and eclipse peaks without redesign.</td><td class="num">10,000 concurrent chats<br>1M AI messages / day</td></tr>
+            <tr><td>Security</td><td>OWASP ASVS Level 2; TLS 1.2+; AES-256 at rest; secrets in a key vault; role-based admin access; independent penetration test before launch.</td><td>Penetration test passed</td></tr>
+            <tr><td>Privacy</td><td>Personal identifiers removed before any AI call; no model training on user data without explicit opt-in; AI chats retained 12 months by default and deletable by the user.</td><td>DPDP compliance review</td></tr>
+            <tr><td>AI quality</td><td>Accurate chart facts and interpretations rated well by the advisory panel.</td><td class="num">Chart facts ≥ 99%<br>Panel score ≥ 4.2 / 5<br>Groundedness ≥ 95%</td></tr>
+            <tr><td>AI safety</td><td>Crisis language recognised; unsafe medical content blocked.</td><td class="num">Crisis recall ≥ 98%<br>Unsafe output &lt; 0.1%</td></tr>
+            <tr><td>Accessibility</td><td>WCAG 2.2 AA; reduced-motion respected; 3D and motion are decorative and never carry information alone.</td><td>Audit pass</td></tr>
+            <tr><td>Localisation</td><td>English and Hindi at launch, Devanagari throughout, locale-aware dates and currency, international cards accepted.</td><td>Native-speaker review</td></tr>
+            <tr><td>Observability</td><td>Every AI request traced with model, tokens, latency, cost and guardrail verdicts; dashboards and alerts.</td><td>100% of requests</td></tr>
+            <tr><td>Maintainability</td><td>New modules follow the existing NestJS domain-driven layout; ranking and safety logic covered by tests; evaluation gate in CI.</td><td class="num">≥ 80% coverage on ranking &amp; safety</td></tr>          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="block" id="workflows">
+      <div class="sec-head reveal"><span class="sec-num">10</span><h2>Platform workflows</h2>
+        <p class="lede">Six end-to-end journeys define how the parts work together.</p></div>
+      <div class="actors reveal"><span><i style="background:#fff"></i>User</span><span><i style="background:var(--wash)"></i>AI guide</span><span><i style="background:var(--sun-soft)"></i>Astrologer</span><span><i style="background:#fff;border-style:dashed"></i>System</span><span><i style="background:var(--bad-soft)"></i>Safety action</span></div>
+
+      <div class="flow reveal">
+        <div class="flow-head"><span class="tag">WF-1</span><h3>First-time seeker</h3></div>
+        <ol class="steps">
+          <li><b>Lands</b>Arrives from search, social or a horoscope page.</li>
+          <li><b>Signs up</b>Mobile OTP, age confirmation, consent choices.</li>
+          <li><b>Adds birth details</b>Place autocomplete, time confidence.</li>
+          <li class="actor-sys"><b>Chart computed</b>D1, D9, D10, dasha and transits cached.</li>
+          <li class="actor-ai"><b>First insight</b>Three personal highlights from the chart.</li>
+          <li class="actor-ai"><b>Asks the guide</b>Conversation begins, free quota shown.</li>
+        </ol>
+      </div>
+      <div class="flow reveal">
+        <div class="flow-head"><span class="tag">WF-2</span><h3>AI to astrologer handoff</h3></div>
+        <ol class="steps">
+          <li><b>Asks a deep question</b>For example a health-period concern.</li>
+          <li class="actor-ai"><b>Answers and escalates</b>Gives context, then suggests a specialist.</li>
+          <li class="actor-sys"><b>Matches</b>Three astrologers by RUSE, fit and availability.</li>
+          <li><b>Consents to brief</b>Chooses what to share; sees price per minute.</li>
+          <li class="actor-ast"><b>Consults</b>Astrologer opens with the brief already read.</li>
+          <li><b>Rates</b>Rating, CSAT and optional review.</li>
+        </ol>
+      </div>
+      <div class="flow reveal">
+        <div class="flow-head"><span class="tag">WF-3</span><h3>Direct discovery and booking</h3></div>
+        <ol class="steps">
+          <li><b>Browses</b>Talk or chat with astrologer pages.</li>
+          <li><b>Filters</b>Domain, language, price, available now.</li>
+          <li class="actor-sys"><b>Ranked list</b>RUSE-ordered with exploration slots.</li>
+          <li><b>Opens profile</b>Credentials, tier, reviews, price.</li>
+          <li class="actor-sys"><b>Wallet check</b>Top up by Razorpay if needed.</li>
+          <li class="actor-ast"><b>Session</b>Chat or voice now, or a scheduled booking.</li>
+        </ol>
+      </div>
+      <div class="flow reveal">
+        <div class="flow-head"><span class="tag">WF-4</span><h3>Feedback to RUSE loop</h3></div>
+        <ol class="steps">
+          <li class="actor-sys"><b>Session ends</b>Duration, completion and billing logged.</li>
+          <li><b>Rates</b>Verified-session rating, CSAT, review.</li>
+          <li><b>30-day pulse</b>“Did the guidance prove useful?”</li>
+          <li class="actor-sys"><b>Nightly recompute</b>Normalise, weight, adjust for confidence.</li>
+          <li class="actor-sys"><b>Tier update</b>Visibility and badges refresh.</li>
+          <li class="actor-ast"><b>Dashboard tips</b>Astrologer sees scores and what to improve.</li>
+        </ol>
+      </div>
+      <div class="flow reveal">
+        <div class="flow-head"><span class="tag">WF-5</span><h3>Astrologer onboarding</h3></div>
+        <ol class="steps">
+          <li class="actor-ast"><b>Applies</b>Profile, specialties, languages, pricing.</li>
+          <li class="actor-sys"><b>KYC</b>Identity and payout verification.</li>
+          <li class="actor-sys"><b>Credential review</b>Certificates and experience checked.</li>
+          <li class="actor-ast"><b>Domain assessment</b>Scored by the advisory panel.</li>
+          <li class="actor-ast"><b>Code of conduct</b>Medical, wellness and pricing rules accepted.</li>
+          <li class="actor-sys"><b>Live as Rising</b>Exploration exposure until 25 sessions.</li>
+        </ol>
+      </div>
+      <div class="flow reveal">
+        <div class="flow-head"><span class="tag">WF-6</span><h3>Safety escalation</h3></div>
+        <ol class="steps">
+          <li><b>Sends a message</b>Contains crisis or medical red-flag language.</li>
+          <li class="actor-sys"><b>Detected</b>Safety classifier runs before the guide replies.</li>
+          <li class="alert"><b>Astrology paused</b>Calm, human response; no chart content.</li>
+          <li class="alert"><b>Help shown</b>Tele-MANAS 14416, emergency 112, or local equivalents.</li>
+          <li class="actor-ai"><b>Follow-up</b>Gentle check-in on the next visit.</li>
+          <li class="actor-sys"><b>Reviewed</b>Trust &amp; Quality reviews within 24 hours.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section class="block" id="compliance">
+      <div class="sec-head reveal"><span class="sec-num">11</span><h2>Compliance, safety &amp; ethics</h2></div>
+      <div class="grid g2 reveal">
+        <div class="card">
+          <span class="eyebrow">Data protection</span>
+          <h3>DPDP Act, 2023 and DPDP Rules</h3>
+          <p>Itemised consent notices in English and Hindi, purpose limitation, rights to access, correct and erase, a named grievance officer, breach notification, and accounts limited to adults so no children's data is processed. Health and wellness conversations carry a separate consent.</p>
+        </div>
+        <div class="card">
+          <span class="eyebrow">Advertising &amp; claims</span>
+          <h3>No cure claims, anywhere</h3>
+          <p>The Drugs and Magic Remedies Act prohibits advertising remedies as cures for diseases. This rule applies to marketing, astrologer profiles and AI output alike, and is enforced through the code of conduct, complaint categories and output guardrails.</p>
+        </div>
+        <div class="card">
+          <span class="eyebrow">Consumer protection</span>
+          <h3>Fair pricing, no dark patterns</h3>
+          <p>Per-minute prices shown before sessions, clear refund rules, grievance redressal as required by the E-Commerce Rules, and no fear-based or manipulative prompts in the product or the AI.</p>
+        </div>
+        <div class="card">
+          <span class="eyebrow">AI transparency</span>
+          <h3>Users always know it is an AI</h3>
+          <p>AI disclosure in every conversation, sources on request, a guidance-not-certainty disclaimer, and advisory panel review of every knowledge source the AI can use.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="block" id="roadmap">
+      <div class="sec-head reveal"><span class="sec-num">12</span><h2>Release plan</h2>
+        <p class="lede">16 weeks from kickoff to public launch. The Technical Implementation Blueprint details each phase.</p></div>
+      <div class="phases reveal">
+        <div class="phase"><span class="wk">Weeks 1–2</span><b>Discovery &amp; model bake-off</b><p>Baselines, golden question set, UX prototypes, model comparison.</p><span class="ms">M0 · Model decision</span></div>
+        <div class="phase"><span class="wk">Weeks 3–6</span><b>Foundation &amp; core astrology AI</b><p>AI orchestrator, chart tools, knowledge base v1, streaming chat, RUSE data capture.</p><span class="ms">M1 · Internal beta</span></div>
+        <div class="phase"><span class="wk">Weeks 7–10</span><b>Medical, wellness &amp; handoff</b><p>Advisor-reviewed corpora, safety layer v2, crisis protocol, RUSE-ranked discovery.</p><span class="ms">M2 · Closed beta</span></div>
+        <div class="phase"><span class="wk">Weeks 11–13</span><b>Personalisation &amp; intelligence</b><p>Memory, transit alerts, astrologer co-pilot, reports, Hindi uplift, 3D website.</p><span class="ms">M3 · Feature complete</span></div>
+        <div class="phase"><span class="wk">Weeks 14–16</span><b>Hardening &amp; launch</b><p>Load tests, penetration test, DPDP review, staged rollout.</p><span class="ms">M4 · Public launch</span></div>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="block" id="risks">
+      <div class="sec-head reveal"><span class="sec-num">13</span><h2>Risks &amp; mitigations</h2></div>
+      <div class="table-wrap reveal">
+        <table class="t">
+          <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td>A user acts on an astrological health insight instead of seeking care</td><td><span class="prio m">High</span></td><td>Hard medical guardrails, doctor signposting on every symptom mention, advisor-reviewed corpus, weekly safety audits.</td></tr>
+            <tr><td>The AI states a wrong placement or period</td><td><span class="prio m">High</span></td><td>Charts computed by the kundali engine, never by the model; output check compares every stated fact with the computed chart.</td></tr>
+            <tr><td>Fake reviews inflate rankings</td><td><span class="prio s">Medium</span></td><td>Verified-session reviews only, anomaly detection, confidence adjustment, manual audit of sudden rank jumps.</td></tr>
+            <tr><td>New astrologers get no visibility</td><td><span class="prio s">Medium</span></td><td>Rising badge and two protected exploration slots in every top ten.</td></tr>
+            <tr><td>Model price or availability changes</td><td><span class="prio s">Medium</span></td><td>Provider-agnostic orchestration layer, fallback model, and an evaluation suite that requalifies a new model in days.</td></tr>
+            <tr><td>Hindi answers feel translated</td><td><span class="prio s">Medium</span></td><td>Hindi-native golden set, review by Hindi-speaking astrologers, Hinglish examples in prompts.</td></tr>
+            <tr><td>Astrologers see the AI as competition</td><td><span class="prio s">Medium</span></td><td>Position the AI as their lead source and co-pilot; transparent RUSE; handoff revenue reported on their dashboard.</td></tr>
+            <tr><td>Regulatory change</td><td><span class="prio c">Low</span></td><td>Compliance review each release; consent and retention are configuration, not code.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="block" id="glossary">
+      <div class="sec-head reveal"><span class="sec-num">14</span><h2>Glossary</h2></div>
+      <div class="table-wrap reveal">
+        <table class="t">
+          <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Ashtakoot Guna Milan</td><td>Vedic compatibility method scoring eight factors out of 36 points.</td></tr>
+            <tr><td>Ayanamsa</td><td>Offset between the tropical and sidereal zodiacs; Lahiri is the default for Vedic charts.</td></tr>
+            <tr><td>Vimshottari dasha</td><td>The 120-year system of planetary periods used to time life events.</td></tr>
+            <tr><td>Gochar</td><td>Transits: current planetary positions read against the natal chart.</td></tr>
+            <tr><td>Kalapurusha</td><td>The “cosmic person” mapping the twelve signs onto regions of the body.</td></tr>
+            <tr><td>Navamsa (D9), Dashamsa (D10)</td><td>Divisional charts for relationships and inner strength (D9) and career (D10).</td></tr>
+            <tr><td>Sade Sati</td><td>The roughly 7½-year transit of Saturn over the natal Moon and its neighbouring signs.</td></tr>
+            <tr><td>RUSE</td><td>Reliability, User feedback, Satisfaction, Expertise: the astrologer ranking model.</td></tr>
+            <tr><td>Confidence adjustment</td><td>Pulling scores with little data toward the average so they cannot be extreme by chance.</td></tr>
+            <tr><td>Grounding (RAG)</td><td>Retrieving approved knowledge and computed chart facts and giving them to the AI before it answers.</td></tr>
+            <tr><td>Guardrail</td><td>An automated check before or after the AI responds that enforces safety and policy.</td></tr>
+            <tr><td>Golden set</td><td>Expert-answered questions used to measure AI quality on every change.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="end">
+      <span>AstroPlanet · Business Requirements Document · v1.0</span>
+      <span>Astrological guidance on AstroPlanet supports reflection and does not replace medical, psychological, legal or financial advice.</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  // Zodiac ring: 12 spokes and sidereal sign names on a circular path
+  var names=["MEṢA","VṚṢABHA","MITHUNA","KARKA","SIṂHA","KANYĀ","TULĀ","VṚŚCIKA","DHANU","MAKARA","KUMBHA","MĪNA"];
+  var g=document.getElementById("wheelSpin"), NS="http://www.w3.org/2000/svg", html="";
+  for(var i=0;i<12;i++){
+    var a=(i/12)*Math.PI*2, x1=200+138*Math.cos(a), y1=200+138*Math.sin(a), x2=200+176*Math.cos(a), y2=200+176*Math.sin(a);
+    html+='<line class="spoke" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';
+    html+='<text class="lbl" text-anchor="middle"><textPath href="#ringPath" startOffset="'+((i+0.5)/12*100).toFixed(3)+'%">'+names[i]+'</textPath></text>';
+  }
+  g.innerHTML=html;
+
+  // Reading progress and active contents link
+  var bar=document.getElementById("progress");
+  function onScroll(){var h=document.documentElement;var p=h.scrollTop/((h.scrollHeight-h.clientHeight)||1);bar.style.transform="scaleX("+Math.min(1,Math.max(0,p))+")";}
+  window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+  var links=[].slice.call(document.querySelectorAll("#toc a"));
+  var map={};links.forEach(function(l){map[l.getAttribute("href").slice(1)]=l;});
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){if(e.isIntersecting){links.forEach(function(l){l.classList.remove("active")});var l=map[e.target.id];if(l)l.classList.add("active");}});
+    },{rootMargin:"-30% 0px -60% 0px"});
+    document.querySelectorAll("section.block").forEach(function(s){io.observe(s)});
+  }
+})();
+</script>
+
+</body>
+</html>
